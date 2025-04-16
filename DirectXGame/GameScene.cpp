@@ -16,7 +16,6 @@ void GameScene::Initialize() {
 	//カメラの初期化
 	camera_.Initialize();
 
-	delete model_;
 }
 
 void GameScene::Update() {}
