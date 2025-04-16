@@ -26,4 +26,7 @@ public:
 
 	//カメラ
 	KamataEngine::Camera camera_;
+
+	~GameScene();
 };
+
