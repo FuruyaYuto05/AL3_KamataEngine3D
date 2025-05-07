@@ -1,5 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
+#include <vector>
+
 
 //ゲームシーン
 class GameScene {
@@ -13,7 +15,12 @@ public:
 	//描画
 	void Draw();
 
+	// 3Dモデル
+	KamataEngine::Model* modelBlock_ = nullptr;
 
+	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+
+	~GameScene();
 
 };
 
