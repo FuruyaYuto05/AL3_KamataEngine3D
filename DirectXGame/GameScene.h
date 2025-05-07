@@ -18,7 +18,16 @@ public:
 	// 3Dモデル
 	KamataEngine::Model* modelBlock_ = nullptr;
 
-	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+	// カメラ
+	KamataEngine::Camera camera_;
+
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
+
+	bool isDebugCameraActive_ = false;
+
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+
+	
 
 	~GameScene();
 
