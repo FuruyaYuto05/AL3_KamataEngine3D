@@ -1,10 +1,13 @@
 #pragma once
 #include "KamataEngine.h"
+#include "Skydome.h"
+#include "Player.h"
 #include <vector>
 
 
 //ゲームシーン
 class GameScene {
+
 public:
 	//初期化
 	void Initialize();
@@ -17,6 +20,8 @@ public:
 
 	// 3Dモデル
 	KamataEngine::Model* modelBlock_ = nullptr;
+	KamataEngine::Model* modelSkydome_ = nullptr;
+	KamataEngine::Model* model_ = nullptr;
 
 	// カメラ
 	KamataEngine::Camera camera_;
@@ -27,9 +32,16 @@ public:
 
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 
-	
+	Skydome* skydome_ = nullptr;
+
+	Player* player_ = nullptr;
 
 	~GameScene();
+
+	private:
+	// テクスチャハンドル
+	uint32_t textureHandle_ = 0;
+
 
 };
 

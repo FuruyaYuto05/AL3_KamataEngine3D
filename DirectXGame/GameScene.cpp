@@ -6,7 +6,9 @@ using namespace KamataEngine;
 void GameScene::Initialize() {
 
 	// 3Dモデルの生成
-	modelBlock_ = Model::CreateFromOBJ("cube");
+	modelBlock_ = Model::CreateFromOBJ("block");
+	modelSkydome_ = Model::CreateFromOBJ("SkyDome", true);
+	model_ = Model::CreateFromOBJ("player");
 
 	// カメラの初期化
 	camera_.Initialize();
@@ -19,6 +21,16 @@ void GameScene::Initialize() {
 	const float kBlockWidth = 2.0f;
 	const float kBlockHeight = 2.0f;
 
+	skydome_ = new Skydome();
+	player_ = new Player();
+
+	textureHandle_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
+
+
+	skydome_->Initialize(modelSkydome_, textureHandle_, &camera_);
+
+	player_->Initialize(model_, textureHandle_, &camera_);
+
 	worldTransformBlocks_.resize(kNumBlockVirtical);
 
 	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
@@ -29,7 +41,7 @@ void GameScene::Initialize() {
 
 		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
 
-			if (j % 2 == 0)
+			if ((i + j) % 2 == 0)
 				continue;
 			worldTransformBlocks_[i][j] = new WorldTransform();
 			worldTransformBlocks_[i][j]->Initialize();
@@ -76,7 +88,8 @@ void GameScene::Draw() {
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	Model::PreDraw(dxCommon->GetCommandList());
-
+	skydome_->Draw();  
+	player_->Draw();
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -84,6 +97,7 @@ void GameScene::Draw() {
 				continue;
 			
 			modelBlock_->Draw(*worldTransformBlock, camera_);
+			model_->Draw(*worldTransformBlock, camera_);
 		}
 	}
 }
@@ -92,6 +106,8 @@ GameScene::~GameScene() {
 
 	delete modelBlock_;
 	delete debugCamera_;
+	delete modelSkydome_;
+	delete model_;
 
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 
