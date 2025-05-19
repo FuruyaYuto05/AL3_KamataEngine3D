@@ -28,13 +28,17 @@ void GameScene::Initialize() {
 
 	skydome_->Initialize(modelSkydome_, textureHandle_, &camera_);
 
-	player_->Initialize(model_, textureHandle_, &camera_);
+	
 
 	worldTransformBlocks_.resize(kNumBlockVirtical);
 
 
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 19);
+
+	player_->Initialize(model_, &camera_, playerPosition);
 
 	GenerateBlocks();
 
