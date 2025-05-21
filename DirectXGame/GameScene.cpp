@@ -26,9 +26,9 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 
 
-	skydome_->Initialize(modelSkydome_, textureHandle_, &camera_);
+	skydome_->Initialize(modelSkydome_,  &camera_);
 
-	player_->Initialize(model_, textureHandle_, &camera_);
+	player_->Initialize(model_, &camera_);
 
 	worldTransformBlocks_.resize(kNumBlockVirtical);
 
