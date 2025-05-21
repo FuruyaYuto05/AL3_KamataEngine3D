@@ -1,21 +1,24 @@
 #include "Player.h"
-#include <cassert>
-using namespace KamataEngine;
+#include "MyMath.h"
+#include "cassert"
 
-void Player::Initialize(Model* model, uint32_t textureHandle, Camera* camera) {
+void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera) {
 	assert(model);
 	model_ = model;
-	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
 	camera_ = camera;
 }
-void Player::Update() { worldTransform_.TransferMatrix(); }
-void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
 
-Player::~Player() {
-	// リソースが不要ならばここで解放
-	if (model_ != nullptr) {
-		delete model_;
-		model_ = nullptr;
+void Player::Update() {
+	for (std::vector<KamataEngine::WorldTransform*>& worldTransformPlayerLine : worldTransformPlayer_) {
+		for (KamataEngine::WorldTransform* worldTransformPlayer : worldTransformPlayerLine) {
+			if (!worldTransformPlayer) {
+				continue;
+			}
+			worldTransformPlayer->matWorld_ = MakeAffineMatrix(worldTransformPlayer->scale_, worldTransformPlayer->rotation_, worldTransformPlayer->translation_);
+			worldTransformPlayer->TransferMatrix();
+		}
 	}
 }
+
+void Player::Draw() { model_->Draw(worldTransform_, *camera_); }

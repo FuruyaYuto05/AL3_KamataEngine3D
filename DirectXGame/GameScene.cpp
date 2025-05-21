@@ -29,7 +29,7 @@ void GameScene::Initialize() {
 
 	skydome_->Initialize(modelSkydome_, textureHandle_, &camera_);
 
-	player_->Initialize(model_, textureHandle_, &camera_);
+	player_->Initialize(model_, &camera_);
 
 	worldTransformBlocks_.resize(kNumBlockVirtical);
 
