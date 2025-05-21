@@ -12,9 +12,13 @@ private:
 
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformPlayer_;
 
+	KamataEngine::Vector3 velocity_ = {};
+
+	static inline const float kAcceleration = 2;
+
 public:
 	// 初期化
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera,const KamataEngine::Vector3& position);
 	// 更新
 	void Update();
 	// 描画
