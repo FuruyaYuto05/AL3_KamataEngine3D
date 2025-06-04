@@ -3,6 +3,7 @@
 #include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
+#include "CameraController.h"
 #include <vector>
 
 class GameScene {
@@ -20,9 +21,14 @@ class GameScene {
 
 	Skydome* skydome_ = nullptr;
 
+	KamataEngine::Model* modelCameracontoroller_ = nullptr;
+
+	CameraController* cameraController_;
+
+
 	MapChipField* mapChipField_;
 	void GenerateBlocks();
-
+	
 private:
 	uint32_t textureHandle_ = 0;
 	KamataEngine::Model* modelBlock_;

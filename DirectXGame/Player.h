@@ -38,6 +38,8 @@ private:
 	static inline const float kLimitFallSpeed = 0.7f;
 	static inline const float kJumpAcceleration = 1.0f;
 
+	
+
 public:
 	// 初期化
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera,const KamataEngine::Vector3& position);
@@ -45,4 +47,8 @@ public:
 	void Update();
 	// 描画
 	void Draw();
+
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 };
