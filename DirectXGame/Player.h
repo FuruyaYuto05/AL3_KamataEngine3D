@@ -16,7 +16,7 @@ enum Corner {
 
 // マップの当たり判定情報
 struct CollisionMapInfo {
-	bool cailing = false;
+	bool ceiling = false;
 	bool landing = false;
 	bool hitWall = false;
 	Vector3 move;
@@ -39,12 +39,14 @@ private:
 
 	KamataEngine::Vector3 velocity_ = {};
 
-	static inline const float kAcceleration = 0.5f;
+	static inline const float kAcceleration = 0.3f;
 	static inline const float kAttenuation = 0.1f;
-	static inline const float kLimitRunSpeed = 1.0f;
+	static inline const float kLimitRunSpeed = 0.5f;
+	static inline const float kGroundSearchHeight = 0.1f;
+	static inline const float kAttenuationLanding = 0.5f;
+	static inline const float kAttenuationWall = 0.5f;
 
 	
-
 	LRDirection lrDirection_ = LRDirection::kRight;
 
 	float turnFirstRotationY_ = 0.0f;
@@ -67,8 +69,8 @@ private:
 public:
 
 	// キャラクターの当たり判定サイズ
-	static inline const float kWidth = 0.0f;
-	static inline const float kHeight = 0.0f;
+	static inline const float kWidth = 0.5f;
+	static inline const float kHeight = 0.5f;
 
 	static inline const float kBlank = 1;
 	
@@ -91,7 +93,16 @@ public:
 
 	void CheckMapCollisionUp(CollisionMapInfo& info);
 	
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
 	
+	void CheckMapWall(CollisionMapInfo& info);
+
+	void CheckMapLanding(CollisionMapInfo& info);
+
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
 	void CheckMove(const CollisionMapInfo& info);

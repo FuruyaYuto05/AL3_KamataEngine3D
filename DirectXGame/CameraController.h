@@ -23,7 +23,7 @@ private:
 	static inline const float kInterpolationRate = 1.0f;
 
 	//速度掛け率
-	static inline const float kVelocityBias = 10;
+	static inline const float kVelocityBias = 1;
 
 	
 
