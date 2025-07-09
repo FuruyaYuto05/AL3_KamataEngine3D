@@ -13,6 +13,9 @@ void GameScene::Initialize() {
 
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 
+
+	modelEnemy_ = Model::CreateFromOBJ("enemy", true);
+
 	skydome_ = new Skydome();
 
 	skydome_->Initialize(modelSkydome_, &camera_);
@@ -20,7 +23,7 @@ void GameScene::Initialize() {
 	// 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	
-
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 15);
 	
 
 
@@ -35,7 +38,13 @@ void GameScene::Initialize() {
 
 	player_->SetMapChipField(mapChipField_);
 
-	// カメラコントローラの初期化
+	enemy_ = new Enemy();
+
+	enemy_->Initialize(modelEnemy_, &camera_, enemyPosition);
+
+	//enemy_->SetMapChipField(mapChipField_);
+
+	 // カメラコントローラの初期化
 	cameraController_ = new CameraController();
 	cameraController_->Initialize();
 	cameraController_->SetTarget(player_);
@@ -76,6 +85,7 @@ void GameScene::GenerateBlocks() {
 GameScene::~GameScene() {
 	delete model_;
 	delete player_;
+	delete enemy_;
 	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -92,6 +102,7 @@ void GameScene::Update() {
 
 	cameraController_->Update();
 	
+	enemy_->Update();
 	skydome_->Update();
 	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -148,5 +159,7 @@ void GameScene::Draw() {
 	/*for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
 	    modelBlock_->Draw(*worldTransformBlock, camera_);
 	}*/
+
+	enemy_->Draw();
 	Model::PostDraw();
 }
