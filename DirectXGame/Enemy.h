@@ -14,7 +14,7 @@ private:
 
 public:
 	
-	static inline const float kWalSpeed = 0.2f;
+	static inline const float kWalSpeed = 0.05f;
 
 	KamataEngine::Vector3 velocity_ = {};
 
