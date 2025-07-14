@@ -23,7 +23,7 @@ void GameScene::Initialize() {
 	// 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	
-	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 15);
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30, 15);
 	
 
 
