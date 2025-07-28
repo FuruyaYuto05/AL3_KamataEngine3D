@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "skydome.h"
 #include <vector>
+#include "DeathParticles.h"
 
 // ゲームシーンクラス
 class GameScene {
@@ -72,4 +73,10 @@ private:
 	KamataEngine::Model* enemy_model_ = nullptr;
 	// 02_10 4枚目
 	std::list<Enemy*> enemies_;
+
+	// 02_11 15枚目
+	DeathParticles* deathParticles_ = nullptr;
+	KamataEngine::Model* deathParticles_model_ = nullptr;
+
+
 };

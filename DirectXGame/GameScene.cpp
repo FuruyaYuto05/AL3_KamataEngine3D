@@ -19,6 +19,8 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	delete modelSkydome_;
 	delete mapChipField_;
+	delete deathParticles_;
+	
 
 	// 02_09 10枚目 敵クラス削除→02_10 6枚目で削除
 	//	delete enemies_;
@@ -102,6 +104,14 @@ void GameScene::Initialize() {
 
 		enemies_.push_back(newEnemy);
 	}
+
+	// 02_11 16枚目 敵モデル
+	deathParticles_model_ = Model::CreateFromOBJ("deathParticle");
+
+	// 02_11 16枚目
+	deathParticles_ = new DeathParticles;
+	deathParticles_->Initialize(deathParticles_model_, &camera_, playerPosition);
+
 }
 
 void GameScene::GenerateBlocks() {
@@ -135,6 +145,7 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	CController_->Update();
+	
 
 	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
 	//	enemy_->Update();
@@ -178,6 +189,11 @@ void GameScene::Update() {
 
 	// 02_10 22枚目 衝突判定
 	CheckAllCollisions();
+
+	// 02_11 18枚目
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 }
 
 void GameScene::Draw() {
@@ -193,6 +209,11 @@ void GameScene::Draw() {
 
 	// 天球描画
 	skydome_->Draw();
+
+	// 02_11 18枚目
+	if (deathParticles_) {
+		deathParticles_->Draw();
+	}
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
