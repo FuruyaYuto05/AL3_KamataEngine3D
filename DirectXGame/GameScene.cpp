@@ -31,6 +31,8 @@ GameScene::~GameScene() {
 	// 02_11_17枚目
 	delete deathParticles_;
 	delete deathParticle_model_;
+
+	delete fade_;
 }
 
 void GameScene::Initialize() {
@@ -117,7 +119,12 @@ void GameScene::Initialize() {
 	//	    (deathParticle_model_, &camera_, playerPosition);
 
 	// 02_12_4枚目 ゲームプレイフェーズから開始
-	phase_ = Phase::kPlay;
+	phase_ = Phase::kFadeIn;
+
+	fade_ = new Fade();
+	fade_->Initialize();
+
+	fade_->Start(Fade::Status::FadeIn, 1.0f);
 }
 
 // 02_12 10枚目 GameScene::Update関数で呼び出しておく
@@ -139,6 +146,21 @@ void GameScene::ChangePhase() {
 		}
 		break;
 	case Phase::kDeath:
+		if (deathParticles_->IsFinished()) {
+
+			phase_ = Phase::kFadeOut;
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+		}
+		break;
+	case Phase::kFadeIn:
+		if (fade_->IsFinished()) {
+			phase_ = Phase::kPlay;
+		}
+		break;
+	case Phase::kFadeOut:
+		if (fade_->IsFinished()) {
+			finished_ = true;
+		}
 		break;
 	}
 }
@@ -171,6 +193,8 @@ void GameScene::GenerateBlocks() {
 // ゲームシーン更新
 void GameScene::Update() {
 
+	fade_->Update();
+
 	ChangePhase();
 
 	// 02_12 5枚目 まず追加
@@ -182,9 +206,17 @@ void GameScene::Update() {
 		// 02_12 34枚目 デス演出フェーズの処理
 		// deathParticles_->IsFinished関数をDeathParticles.hに実装
 		if (deathParticles_ && deathParticles_->IsFinished()) {
-			finished_ = true;
+			phase_ = Phase::kFadeOut;
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
 		}
 
+		break;
+	case Phase::kFadeIn:
+		fade_->Update();
+		break;
+
+	case Phase::kFadeOut:
+		fade_->Update();
 		break;
 	}
 
@@ -250,9 +282,9 @@ void GameScene::Draw() {
 	Model::PreDraw(dxCommon->GetCommandList());
 
 	// 自キャラの描画
-	if (!player_->IsDead())
+	if (phase_ == Phase::kPlay || phase_ == Phase::kFadeIn) {
 		player_->Draw();
-
+	}
 	// 天球描画
 	skydome_->Draw();
 
@@ -284,6 +316,8 @@ void GameScene::Draw() {
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
+
+	fade_->Draw();
 }
 
 // 02_10 16枚目

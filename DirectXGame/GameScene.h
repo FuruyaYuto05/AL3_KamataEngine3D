@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "skydome.h"
 #include <vector>
+#include "Fade.h"
 
 using namespace KamataEngine;
 
@@ -34,8 +35,11 @@ public:
 private:
 	// 02_12 4枚目 ゲームのフェーズ（型）
 	enum class Phase {
+		kFadeIn,
 		kPlay,  // ゲームプレイ
 		kDeath, // デス演出
+		kFadeOut,
+	
 	};
 
 	// 02_12 4枚目 ゲームの現在フェーズ（変数）
@@ -99,4 +103,6 @@ private:
 
 	// 02_12 26枚目
 	bool finished_ = false;
+
+    Fade* fade_ = nullptr;
 };
