@@ -125,6 +125,15 @@ void GameScene::Initialize() {
 	fade_->Initialize();
 
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
+
+
+	// ゴールモデル生成
+	goal_model_ = Model::CreateFromOBJ("goal");                             // "goal.obj" を用意
+	Vector3 goalPosition = mapChipField_->GetMapChipPositionByIndex(97, 18); // 例: ゴール座標
+	goal_ = new Goal();
+	goal_->Initialize(goalPosition, goal_model_, &camera_);
+
+
 }
 
 // 02_12 10枚目 GameScene::Update関数で呼び出しておく
@@ -271,6 +280,20 @@ void GameScene::Update() {
 	if (deathParticles_) {
 		deathParticles_->Update();
 	}
+
+
+	// ゴール更新
+	if (goal_) {
+		goal_->Update();
+
+		// プレイヤー到達判定
+		if (goal_->IsPlayerReached(player_->GetWorldPosition())) {
+			finished_ = true;
+			fade_->Start(Fade::Status::FadeOut, 2.0f); // ゴール到達でフェードアウト
+		}
+	}
+
+
 }
 
 void GameScene::Draw() {
@@ -309,6 +332,10 @@ void GameScene::Draw() {
 		deathParticles_->Draw();
 	}
 
+		if (goal_) {
+		goal_->Draw();
+	}
+
 	Model::PostDraw();
 
 	// スプライト描画前処理
@@ -318,6 +345,11 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 	fade_->Draw();
+
+
+
+
+
 }
 
 // 02_10 16枚目
