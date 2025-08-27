@@ -75,7 +75,7 @@ void DrawScene() {
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// エンジンの初期化
-	KamataEngine::Initialize(L"LE2D_20_フルヤ_ユウト");
+	KamataEngine::Initialize(L"LE2D_20_フルヤ_ユウト_いざ鬼ヶ島!");
 
 	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();

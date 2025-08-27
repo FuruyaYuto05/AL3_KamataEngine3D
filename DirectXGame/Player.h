@@ -60,7 +60,7 @@ private:
 	// 02_05 移動量
 	Vector3 velocity_ = {};
 	// 02_05  フレームごとの加速度
-	static inline const float kAcceleration = 0.1f;
+	static inline const float kAcceleration = 0.2f;
 	// 02_05 非入力時の摩擦係数
 	static inline const float kAttenuation = 0.05f;
 	// 02_05 最高速度

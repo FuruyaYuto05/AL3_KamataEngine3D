@@ -99,10 +99,10 @@ void GameScene::Initialize() {
 	// enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
 
 	// 02_10 5枚目（for文の中身全部）
-	for (int32_t i = 0; i < 2; ++i) {
+	for (int32_t i = 0; i < 50; ++i) {
 		Enemy* newEnemy = new Enemy();
 
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 15, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 
