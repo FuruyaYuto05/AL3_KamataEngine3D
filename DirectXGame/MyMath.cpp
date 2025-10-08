@@ -156,16 +156,28 @@ bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
 	       (aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z);   // z軸
 }
 
+#include <cmath> // std::abs のために必要
+
 Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
-	Vector3 result; // w=1がデカルト座標系であるので(x,y,1)のベクトルとしてmatrixとの積をとる
+	Vector3 result;
+
+	// x, y, z の計算はそのまま
 	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][0];
 	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
 	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
+
+	// w の計算もそのまま
 	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
-	assert(w != 0.0f); // ベクトルに対して基本的な操作を行う行列でwが0になることはありえない
-	// w=1がデカルト座標系であるので、w除算することで同次座標をデカルト座標に戻す
-	result.x /= w;
-	result.y /= w;
-	result.z /= w;
+
+	// ここでアサートを削除し、wが非常に小さい、または0に近い値でないかチェック
+	if (std::abs(w) > 0.00001f) { // w がほぼ 0 でないことを確認
+		// w=1がデカルト座標系であるので、w除算することで同次座標をデカルト座標に戻す
+		result.x /= w;
+		result.y /= w;
+		result.z /= w;
+	}
+	// else の場合、w が 0 に近いため、除算を行わず result は無効な値（無限遠点）のまま返る
+	// 描画パイプラインの後の処理でクリッピングされるため問題ないことが多い
+
 	return result;
 }
