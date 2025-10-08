@@ -12,12 +12,7 @@ void Goal::Initialize(const Vector3& position, Model* model, Camera* camera) {
 
 void Goal::Update() { WorldTransformUpdate(worldTransform_); }
 
-void Goal::Draw() {
-
-		model_->Draw(worldTransform_, *camera_);
-	
-}
-
+void Goal::Draw() { model_->Draw(worldTransform_, *camera_); }
 
 bool Goal::IsPlayerReached(const Vector3& playerPos) const {
 	float width = 1.0f;
