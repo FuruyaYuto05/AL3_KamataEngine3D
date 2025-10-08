@@ -18,6 +18,7 @@ void Goal::Draw() {
 	
 }
 
+
 bool Goal::IsPlayerReached(const Vector3& playerPos) const {
 	float width = 1.0f;
 	float height = 1.0f;
