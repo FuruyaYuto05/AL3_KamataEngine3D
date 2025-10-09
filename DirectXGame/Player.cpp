@@ -21,13 +21,33 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	camera_ = camera;
 }
 
-// 移動入力(02_07 スライド10枚目)
+// 移動入力
 void Player::InputMove() {
+
+	// 左右のスティックの状態を取得
+	XINPUT_STATE state;
+	Input::GetInstance()->GetJoystickState(0, state);
+
+	// 左スティックのX軸の値を取得
+	short thumbX = state.Gamepad.sThumbLX;
+
+	// デッドゾーンを設定
+	const short DEADZONE = 16000;
+
+	// 優先度制御用のフラグ
+	bool keyboardInputX = false;
+
+	// 二回目のジャンプが可能か
+	bool can2Jump = false;
 
 	if (onGround_) {
 
-		// 左右移動操作
+		// 地上での左右移動操作
+	
+		// キーボードの左右移動操作をまずチェック
 		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+
+			keyboardInputX = true; // キーボード入力あり
 
 			// 左右加速
 			Vector3 acceleration = {};
@@ -56,28 +76,116 @@ void Player::InputMove() {
 				}
 			}
 			velocity_ += acceleration;
-			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-		} else {
-			// 非入力時は移動減衰をかける
-			velocity_.x *= (1.0f - kAttenuation);
 		}
+		
+		// キーボード入力がない場合のみ、コントローラーのスティック入力をチェック
+		if (!keyboardInputX) {
+
+			// スティックが右に倒されているかチェック
+			if (thumbX > DEADZONE) {
+				// スティックの傾きを0.0～1.0の範囲に正規化
+				float normalizedX = (float)(thumbX - DEADZONE) / (32767.0f - DEADZONE);
+
+				if (velocity_.x < 0.0f) {
+					velocity_.x *= (1.0f - kAttenuation);
+				}
+				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
+
+				// 旋回処理
+				if (lrDirection_ != LRDirection::kRight) {
+					lrDirection_ = LRDirection::kRight;
+					turnFirstRotationY_ = worldTransform_.rotation_.y;
+					turnTimer_ = kTimeTurn;
+				}
+			}
+			// スティックが左に倒されているかチェック
+			else if (thumbX < -DEADZONE) {
+				// スティックの傾きを0.0～-1.0の範囲に正規化
+				float normalizedX = (float)(thumbX + DEADZONE) / (32767.0f - DEADZONE);
+
+				if (velocity_.x > 0.0f) {
+					velocity_.x *= (1.0f - kAttenuation);
+				}
+				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
+
+				// 旋回処理
+				if (lrDirection_ != LRDirection::kLeft) {
+					lrDirection_ = LRDirection::kLeft;
+					turnFirstRotationY_ = worldTransform_.rotation_.y;
+					turnTimer_ = kTimeTurn;
+				}
+			} else {
+				// キーボードもスティックも入力がない場合は減衰をかける
+				velocity_.x *= (1.0f - kAttenuation);
+			}
+		}
+
+		// 速度の制限
+		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
 
 		// ほぼ0の場合に0にする
 		if (std::abs(velocity_.x) <= 0.0001f) {
 			velocity_.x = 0.0f;
 		}
 
-		if (Input::GetInstance()->PushKey(DIK_UP)) {
+		//ジャンプ操作（DIK_UP または Aボタン）
+		if (Input::GetInstance()->PushKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
 			// ジャンプ初速
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
+
+	
+
+		
 	} else {
+		// 空中での処理（落下速度と空中移動）
+
+		//二段ジャンプ
+		can2Jump = true;
+		
+		if (can2Jump) {
+			if (Input::GetInstance()->PushKey(DIK_DOWN) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+				// ジャンプ初速
+				velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+
+				can2Jump = false;
+			}
+		}
 		// 落下速度
 		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+
+		// 空中移動のキーボード優先ロジック
+		keyboardInputX = false;
+
+		// キーボード入力チェック
+		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+			keyboardInputX = true;
+			// キーボードでの空中加速
+			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+				velocity_.x += kAcceleration / 60.0f;
+			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+				velocity_.x -= kAcceleration / 60.0f;
+			}
+		}
+
+		// キーボード入力がない場合のみコントローラーチェック
+		if (!keyboardInputX) {
+			// コントローラーによる空中移動
+			if (thumbX > DEADZONE) {
+				float normalizedX = (float)(thumbX - DEADZONE) / (32767.0f - DEADZONE);
+				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
+			} else if (thumbX < -DEADZONE) {
+				float normalizedX = (float)(thumbX + DEADZONE) / (32767.0f - DEADZONE);
+				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
+			}
+		}
+
+		// 空中での速度制限
+		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+
 	}
 }
-
 // 02_07 スライド13枚目
 void Player::CheckMapCollision(CollisionMapInfo& info) {
 

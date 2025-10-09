@@ -46,6 +46,7 @@ public:
 	// 02_10 21枚目 衝突応答
 	void OnCollision(const Enemy* enemy);
 
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
