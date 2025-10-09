@@ -8,6 +8,11 @@
 #include <cassert>
 #include <numbers>
 
+// 攻撃時間の定数を定義 (例: 1秒間に60フレームと仮定)
+const uint32_t kChargeDuration = 10; // 溜め動作時間
+const uint32_t kAttackDuration = 10; // 突進動作時間
+const uint32_t kAfterDuration = 10;  // 余韻動作時間
+
 void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	assert(model);
@@ -23,7 +28,7 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 // 移動入力(02_07 スライド10枚目)
 void Player::InputMove() {
-
+	// ... (関数の中身は変更なし)
 	if (onGround_) {
 
 		// 左右移動操作
@@ -359,16 +364,39 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
 	Vector3 offsetTable[] = {
-	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kRightBottom
-	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kLeftBottom
-	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, //  kRightTop
-	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  //  kLeftTop
-	};
+	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, // kRightBottom
+	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //    kLeftBottom
+	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, //    kRightTop
+	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}
+    };
 
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
 
-void Player ::Update() {
+// ルートビヘイビアの初期化（スライドの指示により追加）
+void Player::BehaviorRootInitialize() {
+	// 初期化処理は後回し
+}
+
+// 攻撃ビヘイビアの初期化
+void Player::BehaviorAttackInitialize() {
+	// カウンター初期化
+	attackParameter_ = 0;
+	// 攻撃フェーズの初期化（スライドに基づき、最初は溜め動作）
+	attackPhase_ = AttackPhase::kCharge;
+	// 攻撃ビヘイビアの開始時にvelocityをゼロクリア（スライドより）
+	velocity_ = Vector3(0.0f, 0.0f, 0.0f);
+}
+
+// ルートビヘイビアの処理
+void Player::BehaviorRootUpdate() {
+
+	// << Behaviorの切り替えリクエスト >>
+	// 攻撃キーを押したら
+	if (Input::GetInstance()->PushKey(DIK_LSHIFT)) { // DIK_LSHIFT に変更
+		// 攻撃ビヘイビアをリクエスト
+		behaviorRequest_ = Behavior::kAttack;
+	}
 
 	// 移動入力(02_07 スライド10枚目)
 	InputMove();
@@ -395,37 +423,7 @@ void Player ::Update() {
 
 	// 接地判定
 	UpdateOnGround(collisionMapInfo);
-	/*
-	    //02_08 スライド22枚目まで実装したら
-	    //（↑でUpdateOnGround関数実装したら）コメントアウト
 
-	    //移動
-	    bool landing = false;
-
-	    // 下降あり？
-	    if (velocity_.y < 0) {
-	        // Y座標が地面以下になったら着地
-	        if (worldTransform_.translation_.y <= 1.0f) {
-	            landing = true;
-	        }
-	    }
-
-	    // 接地判定
-	    if (onGround_) {
-	        // ジャンプ開始
-	        if (velocity_.y > 0.0f) {
-	            onGround_ = false;
-	        }
-	    }else {
-	        // 着地
-	        if (landing) {
-	            worldTransform_.translation_.y = 1.0f;
-	            velocity_.x *= (1.0f - kAttenuation);
-	            velocity_.y  = 0.0f;
-	            onGround_    = true;
-	        }
-	    }
-	*/
 	// 旋回制御
 	if (turnTimer_ > 0.0f) {
 		// タイマーを進める
@@ -440,6 +438,125 @@ void Player ::Update() {
 
 	// ワールド行列更新（アフィン変換～DirectXに転送）
 	WorldTransformUpdate(worldTransform_);
+}
+
+// 攻撃行動更新の実装
+void Player::BehaviorAttackUpdate() {
+	// 攻撃動作用の速度
+	Vector3 velocityUpdate = {};
+	// 攻撃動作の強さ
+	const float kAttackSpeed = 0.3f;
+
+	// 攻撃フェーズごとの更新処理
+	switch (attackPhase_) {
+	case AttackPhase::kCharge: // 溜め動作
+	{
+		// << 溜め動作 >>
+		float t = static_cast<float>(attackParameter_) / kChargeDuration;
+		// 縦に縮み、奥に伸びるアニメーション (EaseOut(開始値, 終了値, t))
+		worldTransform_.scale_.z = EaseOut(1.0f, 0.3f, t);
+		worldTransform_.scale_.y = EaseOut(1.0f, 1.6f, t);
+
+		// カウンターインクリメント
+		attackParameter_++;
+
+		// 前進動作へ移行 (規定時間経過で遷移)
+		if (attackParameter_ >= kChargeDuration) {
+			attackPhase_ = AttackPhase::kAttack; // 攻撃フェーズへ遷移
+			attackParameter_ = 0;                // カウンターをリセット
+		}
+		break;
+	}
+	case AttackPhase::kAttack: // 突進動作
+	{
+		// << 突進動作 >>
+		float t = static_cast<float>(attackParameter_) / kAttackDuration;
+		// 奥から戻り、縦に伸びてから戻るアニメーション (EaseOut/EaseIn(開始値, 終了値, t))
+		worldTransform_.scale_.z = EaseOut(0.3f, 1.3f, t);
+		worldTransform_.scale_.y = EaseIn(1.6f, 0.7f, t);
+
+		// << 移動のコントロール >> (突進時だけ移動)
+		// 速度をローカル変数に格納
+		if (lrDirection_ == LRDirection::kRight) {
+			velocityUpdate.x = kAttackSpeed;
+		} else {
+			velocityUpdate.x = -kAttackSpeed;
+		}
+
+		// カウンターインクリメント
+		attackParameter_++;
+
+		// 余韻動作へ移行 (規定時間経過で遷移)
+		if (attackParameter_ >= kAttackDuration) {
+			attackPhase_ = AttackPhase::kAfter; // 余韻フェーズへ遷移
+			attackParameter_ = 0;               // カウンターをリセット
+		}
+		break;
+	}
+	case AttackPhase::kAfter: // 余韻動作
+	{
+		// << 余韻動作 >>
+		// スケールを元の 1.0f に戻すアニメーション (EaseOut(開始値, 終了値, t))
+		float t = static_cast<float>(attackParameter_) / kAfterDuration;
+		worldTransform_.scale_.z = EaseOut(1.3f, 1.0f, t);
+		worldTransform_.scale_.y = EaseOut(0.7f, 1.0f, t);
+
+		// カウンターインクリメント
+		attackParameter_++;
+
+		// 通常状態に戻す (最後の攻撃フェーズ)
+		if (attackParameter_ >= kAfterDuration) {
+			behaviorRequest_ = Behavior::kRoot; // ルートビヘイビアをリクエスト
+			// スケールリセット (念のため、次のフレームでリセットされるがここで完了させる)
+			worldTransform_.scale_ = {1.0f, 1.0f, 1.0f};
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	// 攻撃行動中は衝突判定を省略し、速度を直接適用する
+	worldTransform_.translation_ += velocityUpdate;
+
+	// ワールド行列更新（アフィン変換～DirectXに転送）
+	WorldTransformUpdate(worldTransform_);
+}
+
+// 更新
+void Player::Update() {
+
+	// スライドの指示により追加：ビヘイビア遷移のロジックを挿入
+	if (behaviorRequest_ != Behavior::kUnknown) { // ① kUnknown以外の値が入っている時、trueになる
+		// 振るまいを変更する
+		behavior_ = behaviorRequest_; // ② ビヘイビアをbehaviorRequest_で指定されたものに変更する
+		// 各振るまいごとの初期化を実行
+		switch (behavior_) {
+		case Behavior::kRoot:
+			BehaviorRootInitialize(); // ③ ルートビヘイビアの初期化
+			break;
+		case Behavior::kAttack:
+			BehaviorAttackInitialize(); // ③ 攻撃ビヘイビアの初期化
+			break;
+		default:
+			break;
+		}
+		// 振るまいリクエストをリセット
+		behaviorRequest_ = Behavior::kUnknown; // ④ 変更予約をクリアする
+	}
+
+	// 現在のビヘイビアに応じて更新関数を呼び出す
+	switch (behavior_) {
+	case Behavior::kRoot:
+		BehaviorRootUpdate(); // ルートビヘイビアの更新
+		break;
+	case Behavior::kAttack:
+		BehaviorAttackUpdate(); // 攻撃ビヘイビアの更新
+		break;
+	default:
+		// 何もしない
+		break;
+	}
 }
 
 void Player::Draw() {

@@ -19,11 +19,27 @@ public:
 	// 角 02_07スライド16枚目
 	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorner };
 
+	// スライドの指示により追加
+	// 振るまい
+	enum class Behavior {
+		kRoot,
+		kAttack,
+		kUnknown, // 状態不明・変更リクエストなし (前回の修正で追加)
+	};
+
 	/// 初期化
 	void Initialize(Model* model, Camera* camera, const Vector3& position);
 
 	/// 更新
 	void Update();
+
+	// スライドの指示により追加
+	// 通常行動更新
+	void BehaviorRootUpdate();
+
+	// スライドの指示により追加
+	// 攻撃行動更新
+	void BehaviorAttackUpdate();
 
 	/// 描画
 	void Draw();
@@ -50,6 +66,36 @@ public:
 	bool IsDead() const { return isDead_; }
 
 private:
+	// スライドの指示により追加
+	// 振るまい
+	Behavior behavior_ = Behavior::kRoot;
+
+	// スライドの指示により追加 (前回の修正で追加)
+	// 次の振るまいリクエスト
+	Behavior behaviorRequest_ = Behavior::kUnknown;
+
+	// スライドの指示により追加
+	// 通常行動初期化
+	void BehaviorRootInitialize();
+	// 攻撃行動初期化
+	void BehaviorAttackInitialize();
+
+	// スライドの指示により追加
+	// 攻撃ギミックの経過時間カウンター
+	uint32_t attackParameter_ = 0;
+
+	// スライドの指示により追加
+	// 攻撃フェーズ (型)
+	enum class AttackPhase {
+		kCharge, // 溜め
+		kAttack, // 攻撃
+		kAfter,  // 余韻
+	};
+
+	// スライドの指示により追加
+	// 現在の攻撃フェーズ (変数)
+	AttackPhase attackPhase_ = AttackPhase::kCharge; // 初期状態を溜めに設定
+
 	// ワールド変換データ
 	WorldTransform worldTransform_;
 	// モデル
@@ -59,7 +105,7 @@ private:
 	Camera* camera_ = nullptr;
 	// 02_05 移動量
 	Vector3 velocity_ = {};
-	// 02_05  フレームごとの加速度
+	// 02_05  フレームごとの加速度
 	static inline const float kAcceleration = 0.1f;
 	// 02_05 非入力時の摩擦係数
 	static inline const float kAttenuation = 0.05f;
@@ -84,6 +130,7 @@ private:
 	MapChipField* mapChipField_ = nullptr;
 	// 02_07 キャラクターの当たり判定サイズ
 	static inline const float kWidth = 0.8f;
+	// 02_07 キャラクターの当たり判定サイズ
 	static inline const float kHeight = 0.8f;
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;

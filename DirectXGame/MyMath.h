@@ -50,6 +50,11 @@ void WorldTransformUpdate(WorldTransform& worldTransform);
 
 float Lerp(float x1, float x2, float t);
 
+
+float EaseIn(float x1, float x2, float t);
+
+float EaseOut(float x1, float x2, float t);
+
 float EaseInOut(float x1, float x2, float t);
 
 bool IsCollision(const AABB& aabb1, const AABB& aabb2);
