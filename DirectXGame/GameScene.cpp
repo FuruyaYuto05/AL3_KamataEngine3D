@@ -191,9 +191,9 @@ void GameScene::Update() {
 	CheckAllCollisions();
 
 	// 02_11 18枚目
-	if (deathParticles_) {
+	/*if (deathParticles_) {
 		deathParticles_->Update();
-	}
+	}*/
 }
 
 void GameScene::Draw() {
@@ -211,9 +211,9 @@ void GameScene::Draw() {
 	skydome_->Draw();
 
 	// 02_11 18枚目
-	if (deathParticles_) {
+	/*if (deathParticles_) {
 		deathParticles_->Draw();
-	}
+	}*/
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {

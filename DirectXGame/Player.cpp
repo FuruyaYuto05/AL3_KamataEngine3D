@@ -37,13 +37,12 @@ void Player::InputMove() {
 	// 優先度制御用のフラグ
 	bool keyboardInputX = false;
 
-	// 二回目のジャンプが可能か
-	bool can2Jump = false;
+
 
 	if (onGround_) {
 
 		// 地上での左右移動操作
-	
+
 		// キーボードの左右移動操作をまずチェック
 		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
 
@@ -77,7 +76,7 @@ void Player::InputMove() {
 			}
 			velocity_ += acceleration;
 		}
-		
+
 		// キーボード入力がない場合のみ、コントローラーのスティック入力をチェック
 		if (!keyboardInputX) {
 
@@ -128,27 +127,22 @@ void Player::InputMove() {
 			velocity_.x = 0.0f;
 		}
 
-		//ジャンプ操作（DIK_UP または Aボタン）
-		if (Input::GetInstance()->PushKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		// 一段目ジャンプ操作（DIK_UP または Aボタン）
+		if (Input::GetInstance()->TriggerKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
 			// ジャンプ初速
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
 
-	
-
-		
 	} else {
 		// 空中での処理（落下速度と空中移動）
 
-		//二段ジャンプ
-		can2Jump = true;
-		
-		if (can2Jump) {
-			if (Input::GetInstance()->PushKey(DIK_DOWN) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		if (can2Jump_) {
+			if (Input::GetInstance()->TriggerKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+				//一段目のジャンプ速度をリセット
+				velocity_.y = 0.0f; 
 				// ジャンプ初速
 				velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
-
-				can2Jump = false;
+				can2Jump_ = false;
 			}
 		}
 		// 落下速度
@@ -168,7 +162,7 @@ void Player::InputMove() {
 				velocity_.x -= kAcceleration / 60.0f;
 			}
 		}
-
+		
 		// キーボード入力がない場合のみコントローラーチェック
 		if (!keyboardInputX) {
 			// コントローラーによる空中移動
@@ -183,7 +177,6 @@ void Player::InputMove() {
 
 		// 空中での速度制限
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-
 	}
 }
 // 02_07 スライド13枚目
@@ -352,6 +345,8 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 			velocity_.x *= (1.0f - kAttenuationLanding);
 			// Y速度をゼロに
 			velocity_.y = 0.0f;
+
+			can2Jump_ = true;
 		}
 	}
 }
@@ -467,10 +462,10 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
 	Vector3 offsetTable[] = {
-	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kRightBottom
-	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kLeftBottom
-	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, //  kRightTop
-	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  //  kLeftTop
+	{+kWidth / 2.0f, -kHeight / 2.0f, 0}, //    kRightBottom
+	{-kWidth / 2.0f, -kHeight / 2.0f, 0}, //    kLeftBottom
+	{+kWidth / 2.0f, +kHeight / 2.0f, 0}, //    kRightTop
+	{-kWidth / 2.0f, +kHeight / 2.0f, 0}//  kLeftTop
 	};
 
 	return center + offsetTable[static_cast<uint32_t>(corner)];
@@ -504,35 +499,35 @@ void Player ::Update() {
 	// 接地判定
 	UpdateOnGround(collisionMapInfo);
 	/*
-	    //02_08 スライド22枚目まで実装したら
-	    //（↑でUpdateOnGround関数実装したら）コメントアウト
+	    //02_08 スライド22枚目まで実装したら
+	    //（↑でUpdateOnGround関数実装したら）コメントアウト
 
-	    //移動
-	    bool landing = false;
+	    //移動
+	    bool landing = false;
 
-	    // 下降あり？
-	    if (velocity_.y < 0) {
-	        // Y座標が地面以下になったら着地
-	        if (worldTransform_.translation_.y <= 1.0f) {
-	            landing = true;
-	        }
-	    }
+	    // 下降あり？
+	    if (velocity_.y < 0) {
+	        // Y座標が地面以下になったら着地
+	        if (worldTransform_.translation_.y <= 1.0f) {
+	            landing = true;
+	        }
+	    }
 
-	    // 接地判定
-	    if (onGround_) {
-	        // ジャンプ開始
-	        if (velocity_.y > 0.0f) {
-	            onGround_ = false;
-	        }
-	    }else {
-	        // 着地
-	        if (landing) {
-	            worldTransform_.translation_.y = 1.0f;
-	            velocity_.x *= (1.0f - kAttenuation);
-	            velocity_.y  = 0.0f;
-	            onGround_    = true;
-	        }
-	    }
+	    // 接地判定
+	    if (onGround_) {
+	        // ジャンプ開始
+	        if (velocity_.y > 0.0f) {
+	            onGround_ = false;
+	        }
+	    }else {
+	        // 着地
+	        if (landing) {
+	            worldTransform_.translation_.y = 1.0f;
+	            velocity_.x *= (1.0f - kAttenuation);
+	            velocity_.y  = 0.0f;
+	            onGround_    = true;
+	        }
+	    }
 	*/
 	// 旋回制御
 	if (turnTimer_ > 0.0f) {
