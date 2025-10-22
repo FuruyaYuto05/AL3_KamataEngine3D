@@ -1,6 +1,8 @@
 #pragma once
 #include "KamataEngine.h"
 #include "MyMath.h"
+#include <numbers>
+
 using namespace KamataEngine;
 
 class MapChipField;
@@ -46,6 +48,7 @@ public:
 	// 02_10 21枚目 衝突応答
 	void OnCollision(const Enemy* enemy);
 
+	bool IsInvincible() const { return isInvincible_; }
 
 private:
 	// ワールド変換データ
@@ -119,4 +122,28 @@ private:
 	static inline const float kAttenuationWall = 0.2f;
 	//２段ジャンプできるかのフラグ
 	bool can2Jump_ = false;
+
+
+	// --- ローリング機能関連の追加 ---
+
+	// ローリングの状態を管理
+	bool isRolling_ = false;       // ローリング中か否か
+	Vector3 rollDirection_ = {};   // ローリングする方向
+	float currentRollTime_ = 0.0f; // ローリング開始からの経過時間
+
+	// ローリングのパラメータ
+	static inline const float kRollSpeed = 0.2f;    // ローリング中の移動速度 
+	static inline const float kRollDuration = 0.3f; // ローリングの持続時間 
+
+	// --- 無敵状態関連の追加 ---
+	bool isInvincible_ = false; // 無敵状態か
+
+	// --- メソッド宣言 ---
+	void StartRoll();                 // ローリングを開始する処理
+	void HandleRoll(float deltaTime); // ローリング中の移動と終了処理
+
+	// --- ローリング回転関連の追加 ---
+	// ローリング中のX軸回転量 
+	static inline const float kRollRotationX = std::numbers::pi_v<float> * 2.0f * 2.0f;
+	float rollFirstRotationX_ = 0.0f;
 };

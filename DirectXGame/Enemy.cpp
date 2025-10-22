@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "MyMath.h"
+#include "Player.h"
 #include <cassert>
 #include <numbers>
 
@@ -76,6 +77,10 @@ Vector3 Enemy::GetWorldPosition() {
 
 // 02_10 スライド20枚目
 void Enemy::OnCollision(const Player* player) {
+	// --- プレイヤーの無敵状態チェック ---
+	if (player->IsInvincible()) {
+		return;
+	}
 	(void)player;
-	//
+	
 }
