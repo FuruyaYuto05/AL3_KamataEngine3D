@@ -24,6 +24,8 @@ public:
 	Vector3 GetWorldPosition();
 	// 02_10 スライド20枚目 衝突応答
 	void OnCollision(const Player* player);
+	// --- プレイヤーの攻撃を受けた際の応答 ---
+	void OnHitByPlayerAttack(const Player* player);
 
 private:
 	// 02_09 6枚目 ザ・ワールド
@@ -50,4 +52,6 @@ private:
 	// 02_10 14枚目 当たり判定サイズ
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+
+
 };

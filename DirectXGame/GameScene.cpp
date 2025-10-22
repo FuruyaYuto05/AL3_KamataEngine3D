@@ -51,6 +51,11 @@ void GameScene::Initialize() {
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
+	attackAABB_model_ = block_model_; // 一時的に
+
+	// 当たり判定用ワールドトランスフォームの初期化
+	attackAABB_worldTransform_.Initialize();
+
 	// 02_03 skydome生成
 	skydome_ = new Skydome();
 	// 初期化
@@ -187,6 +192,32 @@ void GameScene::Update() {
 	// デバッグカメラの更新
 	debugCamera_->Update();
 
+	// 攻撃中かつ、当たり判定が有効な期間（kAttackDuration）の場合
+	if (player_->IsAttacking() && player_->attackTimer_ < player_->kAttackDuration) {
+
+		isAttackAABBDrawn_ = true;
+
+		// 攻撃のAABBを取得
+		AABB attackAABB = player_->GetAttackAABB();
+
+		// 当たり判定ボックスの中心を計算
+		Vector3 center = (attackAABB.min + attackAABB.max) * 0.5f;
+
+		// 当たり判定ボックスのサイズを計算 (max - min)
+		Vector3 size = attackAABB.max;
+		size -= attackAABB.min;
+
+		// WorldTransformに適用
+		attackAABB_worldTransform_.translation_ = center;
+		attackAABB_worldTransform_.scale_ = size;
+
+	} else {
+		isAttackAABBDrawn_ = false;
+	}
+
+	// 当たり判定用トランスフォームの行列を更新
+	WorldTransformUpdate(attackAABB_worldTransform_);
+
 	// 02_10 22枚目 衝突判定
 	CheckAllCollisions();
 
@@ -231,6 +262,13 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 
+
+	// --- 攻撃判定のデバッグ描画 ---
+	if (isAttackAABBDrawn_) {
+		// 当たり判定のモデルを描画
+		attackAABB_model_->Draw(attackAABB_worldTransform_, camera_);
+	}
+
 	Model::PostDraw();
 
 	// スプライト描画前処理
@@ -262,6 +300,26 @@ void GameScene::CheckAllCollisions() {
 				player_->OnCollision(enemy);
 				// 敵弾の衝突時コールバックを呼び出す
 				enemy->OnCollision(player_);
+			}
+		}
+	}
+#pragma endregion
+
+	// --- 自キャラの攻撃判定と敵キャラの当たり判定 ---
+#pragma region 自キャラの攻撃判定 vs 敵
+	if (player_->IsAttacking() && player_->attackTimer_ < player_->kAttackDuration) {
+
+		// 自キャラの攻撃の座標
+		aabb1 = player_->GetAttackAABB();
+
+		for (Enemy* enemy : enemies_) {
+			// 敵の座標
+			aabb2 = enemy->GetAABB();
+
+			// AABB同士の交差判定
+			if (IsCollision(aabb1, aabb2)) {
+			
+				enemy->OnHitByPlayerAttack(player_);
 			}
 		}
 	}

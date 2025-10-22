@@ -1,8 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "MyMath.h"
-#include <numbers>
-
+#include <numbers> 
 using namespace KamataEngine;
 
 class MapChipField;
@@ -40,7 +39,7 @@ public:
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
 	// 02_10 10枚目 ワールド座標を取得
-	Vector3 GetWorldPosition();
+	Vector3 GetWorldPosition() const; 
 
 	// 02_10 13枚目
 	AABB GetAABB();
@@ -48,7 +47,16 @@ public:
 	// 02_10 21枚目 衝突応答
 	void OnCollision(const Enemy* enemy);
 
-	bool IsInvincible() const { return isInvincible_; }
+
+	bool IsInvincible() const { return isInvincible_; }// 無敵中か
+	bool IsAttacking() const { return isAttacking_; }// 攻撃中か
+
+	AABB GetAttackAABB() const;
+	LRDirection GetDirection() const { return lrDirection_; }
+
+	
+	float attackTimer_ = 0.0f;                       
+	static inline const float kAttackDuration = 0.1f; 
 
 private:
 	// ワールド変換データ
@@ -89,8 +97,37 @@ private:
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;
 
+	// --- ローリング機能関連 ---
+	bool isRolling_ = false;          // ローリング中か
+	bool isInvincible_ = false;       // 無敵状態か
+	float currentRollTime_ = 0.0f;    // ローリング開始からの経過時間
+	Vector3 rollDirection_ = {};      // ローリングする方向
+	float rollFirstRotationX_ = 0.0f; // ローリング開始時のX軸回転角度
+
+	// ローリングのパラメータ
+	static inline const float kRollSpeed = 0.2f;
+	static inline const float kRollDuration = 0.3f;
+	static inline const float kRollRotationX = std::numbers::pi_v<float> * 2.0f * 2.0f; // 2周分
+
+	// --- 近接攻撃機能関連 ---
+	bool isAttacking_ = false;                        // 攻撃中か
+	static inline const float kAttackCoolDown = 0.3f; // 攻撃アニメーションと硬直の総時間
+
+	// 攻撃の当たり判定のサイズとオフセット
+	static inline const float kAttackWidth = 1.2f;
+	static inline const float kAttackHeight = 1.0f;
+	static inline const Vector3 kAttackOffset = {0.5f, 0.0f, 0.0f}; // 自機中心から
+
 	// 02_07スライド10枚目 移動入力
 	void InputMove();
+
+	// --- 攻撃・回避メソッド ---
+	void StartRoll();                   // ローリングを開始する処理
+	void HandleRoll(float deltaTime);   // ローリング中の移動と終了処理
+	void StartAttack();                 // 攻撃を開始する処理
+	void HandleAttack(float deltaTime); // 攻撃中の更新処理
+
+
 	// 02_07 スライド12枚目
 	struct CollisionMapInfo {
 		bool ceiling = false;
@@ -120,30 +157,6 @@ private:
 	static inline const float kGroundSearchHeight = 0.06f;
 	// 02_08スライド27枚目 着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
-	//２段ジャンプできるかのフラグ
+	// ２段ジャンプできるかのフラグ
 	bool can2Jump_ = false;
-
-
-	// --- ローリング機能関連の追加 ---
-
-	// ローリングの状態を管理
-	bool isRolling_ = false;       // ローリング中か否か
-	Vector3 rollDirection_ = {};   // ローリングする方向
-	float currentRollTime_ = 0.0f; // ローリング開始からの経過時間
-
-	// ローリングのパラメータ
-	static inline const float kRollSpeed = 0.2f;    // ローリング中の移動速度 
-	static inline const float kRollDuration = 0.3f; // ローリングの持続時間 
-
-	// --- 無敵状態関連の追加 ---
-	bool isInvincible_ = false; // 無敵状態か
-
-	// --- メソッド宣言 ---
-	void StartRoll();                 // ローリングを開始する処理
-	void HandleRoll(float deltaTime); // ローリング中の移動と終了処理
-
-	// --- ローリング回転関連の追加 ---
-	// ローリング中のX軸回転量 
-	static inline const float kRollRotationX = std::numbers::pi_v<float> * 2.0f * 2.0f;
-	float rollFirstRotationX_ = 0.0f;
 };

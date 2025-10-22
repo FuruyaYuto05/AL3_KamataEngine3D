@@ -75,7 +75,7 @@ Vector3 Enemy::GetWorldPosition() {
 	return worldPos;
 }
 
-// 02_10 スライド20枚目
+    // 02_10 スライド20枚目
 void Enemy::OnCollision(const Player* player) {
 	// --- プレイヤーの無敵状態チェック ---
 	if (player->IsInvincible()) {
@@ -83,4 +83,24 @@ void Enemy::OnCollision(const Player* player) {
 	}
 	(void)player;
 	
+}
+// --- プレイヤーの攻撃を受けた際の応答 ---
+void Enemy::OnHitByPlayerAttack(const Player* player) {
+
+	// ノックバックの強さ
+	const float knockbackSpeedX = 0.1f;  // 水平方向の初速
+	const float knockbackSpeedY = 0.05f; // 垂直方向の初速
+
+	// プレイヤーの向きを取得し、ノックバック方向を決定
+	if (player->GetDirection() == Player::LRDirection::kRight) {
+		// プレイヤーが右を向いて攻撃 -> 敵は右にノックバック
+		velocity_.x = knockbackSpeedX;
+	} else {
+		// プレイヤーが左を向いて攻撃 -> 敵は左にノックバック
+		velocity_.x = -knockbackSpeedX;
+	}
+
+	velocity_.y = knockbackSpeedY;
+
+
 }

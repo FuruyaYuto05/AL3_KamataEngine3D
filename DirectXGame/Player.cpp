@@ -25,6 +25,10 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	isRolling_ = false;
 	isInvincible_ = false;
 	currentRollTime_ = 0.0f;
+
+	// 攻撃関連の初期化
+	isAttacking_ = false;
+	attackTimer_ = 0.0f;
 }
 
 // --- Player::StartRoll  ---
@@ -33,7 +37,10 @@ void Player::StartRoll() {
 	isInvincible_ = true; 
 	currentRollTime_ = 0.0f;
 
-	// ローリングの方向を決定（現在の向きを使用）
+	// ローリング前のX軸回転角度を記録
+	rollFirstRotationX_ = worldTransform_.rotation_.x;
+
+	// ローリングaの方向を決定（現在の向きを使用）
 	if (lrDirection_ == LRDirection::kRight) {
 		rollDirection_ = {1.0f, 0.0f, 0.0f};  // 右方向
 	} else {                                  // kLeft
@@ -44,24 +51,22 @@ void Player::StartRoll() {
 	rollDirection_.y = 0.0f;
 	rollDirection_.z = 0.0f;
 
-	// ローリング前のX軸回転角度を記録
-	rollFirstRotationX_ = worldTransform_.rotation_.x; // ← 追加
-
-	// ローリング開始時に、通常の速度をリセット（ローリングに専念させる）
+	// ローリング開始速度をリセット
 	velocity_ = {0.0f, 0.0f, 0.0f};
 }
 
-// --- Player::HandleRoll  ---
-
+// --- Player::HandleRoll ---
 void Player::HandleRoll(float deltaTime) {
 
 	// 1. 移動処理
 	worldTransform_.translation_ += rollDirection_ * kRollSpeed;
-	// 2. 時間の更新と終了チェック
+
+	// 2. 時間の更新
 	currentRollTime_ += deltaTime;
+
 	// 3. ローリング回転処理
 	float t = currentRollTime_ / kRollDuration;
-	t = std::min(t, 1.0f);
+	t = std::min(t, 1.0f); 
 	float destinationRotationX = rollFirstRotationX_ + kRollRotationX;
 	worldTransform_.rotation_.x = EaseInOut(rollFirstRotationX_, destinationRotationX, t);
 
@@ -72,9 +77,30 @@ void Player::HandleRoll(float deltaTime) {
 		isInvincible_ = false; 
 		currentRollTime_ = 0.0f;
 
-		// 終了時の速度をリセット
+		// 終了時の速度とX軸回転をリセット
 		velocity_ = {0.0f, 0.0f, 0.0f};
+		worldTransform_.rotation_.x = 0.0f; 
 	}
+}
+
+// --- Player::StartAttack ---
+void Player::StartAttack() {
+	isAttacking_ = true;
+	attackTimer_ = 0.0f;
+	velocity_ = {0.0f, 0.0f, 0.0f}; 
+
+}
+
+// --- Player::HandleAttack ---
+void Player::HandleAttack(float deltaTime) {
+	attackTimer_ += deltaTime;
+
+	
+	if (attackTimer_ >= kAttackCoolDown) {
+		isAttacking_ = false;
+	}
+
+	
 }
 
 // --- Player::InputMove ---
@@ -153,7 +179,7 @@ void Player::InputMove() {
 			}
 			// スティックが左に倒されているかチェック
 			else if (thumbX < -DEADZONE) {
-				
+				// スティックの傾きを0.0～-1.0の範囲に正規化
 				float normalizedX = (float)(thumbX + DEADZONE) / (32767.0f - DEADZONE);
 
 				if (velocity_.x > 0.0f) {
@@ -168,7 +194,7 @@ void Player::InputMove() {
 					turnTimer_ = kTimeTurn;
 				}
 			} else {
-				// 入力がない場合は減衰する
+				// キーボードもスティックも入力がない場合は減衰をかける
 				velocity_.x *= (1.0f - kAttenuation);
 			}
 		}
@@ -234,7 +260,7 @@ void Player::InputMove() {
 	}
 }
 
-// --- Player::CheckMapCollision ---
+// --- Player::CheckMapCollision (衝突判定のラッパー) ---
 // 02_07 スライド13枚目
 void Player::CheckMapCollision(CollisionMapInfo& info) {
 
@@ -244,7 +270,7 @@ void Player::CheckMapCollision(CollisionMapInfo& info) {
 	CheckMapCollisionLeft(info);
 }
 
-// --- Player::CheckMapCollisionUp ---
+// --- Player::CheckMapCollisionUp (上方向の衝突判定) ---
 // 02_07 スライド14枚目(上下左右全て)
 void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 
@@ -297,7 +323,7 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	}
 }
 
-// --- Player::CheckMapCollisionDown ---
+// --- Player::CheckMapCollisionDown (下方向の衝突判定) ---
 void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 
 	// 02_08 スライド7枚目 下降あり？
@@ -347,7 +373,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	}
 }
 
-// --- Player::CheckMapCollisionRight ---
+// --- Player::CheckMapCollisionRight (右方向の衝突判定) ---
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 
 	if (info.move.x <= 0) {
@@ -396,7 +422,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	}
 }
 
-// --- Player::CheckMapCollisionLeft ---
+// --- Player::CheckMapCollisionLeft (左方向の衝突判定) ---
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 	if (info.move.x >= 0) {
@@ -446,7 +472,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	}
 }
 
-// --- Player::UpdateOnGround ---
+// --- Player::UpdateOnGround (接地状態の切り替え) ---
 // 02_08スライド14枚目 設置状態の切り替え処理
 void Player::UpdateOnGround(const CollisionMapInfo& info) {
 
@@ -537,17 +563,23 @@ void Player::Update() {
 	if (isRolling_) {
 		HandleRoll(deltaTime);
 	}
+	// 2. 攻撃中の処理を次に優先
+	else if (isAttacking_) {
+		HandleAttack(deltaTime);
+	}
 
-	// 2. ローリング中でない場合の処理（通常時）
+	// 3. ローリング/攻撃中でない場合の処理（通常時）
 	else {
-		// スペースキーが押されたらローリングを開始
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			// ローリング開始
+		// 攻撃入力のチェック
+		if (Input::GetInstance()->TriggerKey(DIK_Z)) { // Zキーで攻撃
+			StartAttack();
+		}
+		// ローリング入力のチェック
+		else if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			StartRoll();
 		}
 
-		// ローリングを開始しなかった（スペースキーが押されていない）場合のみ、
-		// 通常の移動・衝突・物理演算を行う
+		// どちらも開始しなかった場合のみ、通常の物理演算を行う
 		else {
 			// 移動入力(02_07 スライド10枚目)
 			InputMove();
@@ -589,7 +621,7 @@ void Player::Update() {
 		}
 	}
 
-	// ワールド行列更新（ローリング中も通常時も実行）
+	// ワールド行列更新（ローリング中も攻撃中も通常時も実行）
 	WorldTransformUpdate(worldTransform_);
 }
 
@@ -602,7 +634,7 @@ void Player::Draw() {
 
 // --- Player::GetWorldPosition ---
 // 02_10 10枚目
-Vector3 Player::GetWorldPosition() {
+Vector3 Player::GetWorldPosition() const { // ← GetAttackAABBから呼ばれるため const を追加
 
 	Vector3 worldPos;
 	// ワールド行列の平行移動成分を取得（ワールド座標）
@@ -622,6 +654,31 @@ AABB Player::GetAABB() {
 
 	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
 	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
+
+	return aabb;
+}
+
+// --- Player::GetAttackAABB ---
+AABB Player::GetAttackAABB() const {
+
+	// プレイヤーのワールド座標
+	Vector3 playerWorldPos = GetWorldPosition(); 
+
+	// 攻撃判定のオフセットを初期設定
+	Vector3 adjustedOffset = kAttackOffset;
+
+	// プレイヤーの向きが左の場合、オフセットを反転して攻撃方向を合わせる
+	if (lrDirection_ == LRDirection::kLeft) {
+		adjustedOffset.x *= -1.0f;
+	}
+
+	// 攻撃の中心座標
+	Vector3 attackCenter = playerWorldPos + adjustedOffset;
+
+	AABB aabb;
+	
+	aabb.min = {attackCenter.x - kAttackWidth / 2.0f, attackCenter.y - kAttackHeight / 2.0f, attackCenter.z - kAttackWidth / 2.0f};
+	aabb.max = {attackCenter.x + kAttackWidth / 2.0f, attackCenter.y + kAttackHeight / 2.0f, attackCenter.z + kAttackWidth / 2.0f};
 
 	return aabb;
 }

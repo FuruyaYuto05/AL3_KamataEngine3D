@@ -25,7 +25,7 @@ public:
 
 	// 02_10 16枚目 衝突判定と応答
 	void CheckAllCollisions();
-
+	
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
@@ -78,5 +78,9 @@ private:
 	DeathParticles* deathParticles_ = nullptr;
 	KamataEngine::Model* deathParticles_model_ = nullptr;
 
+	// --- 攻撃判定デバッグ描画用 ---
+	KamataEngine::Model* attackAABB_model_ = nullptr;        
+	KamataEngine::WorldTransform attackAABB_worldTransform_; 
+	bool isAttackAABBDrawn_ = false;                         
 
 };
