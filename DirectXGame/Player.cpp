@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "MapChipField.h"
 #include "MyMath.h"
+#include "Bullet.h"
 
 #include <algorithm>
 #include <cassert>
@@ -29,6 +30,9 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	// 攻撃関連の初期化
 	isAttacking_ = false;
 	attackTimer_ = 0.0f;
+
+	// HPの初期化
+	hp_ = kMaxHP;
 }
 
 // --- Player::StartRoll  ---
@@ -102,6 +106,15 @@ void Player::HandleAttack(float deltaTime) {
 
 	
 }
+
+// --- Player::PopNewBullets ---
+// GameSceneが新しい弾を取得したら、このリストを空にする
+std::list<Bullet*> Player::PopNewBullets() {
+	std::list<Bullet*> result = std::move(bullets_);
+	bullets_.clear();
+	return result;
+}
+
 
 // --- Player::InputMove ---
 void Player::InputMove() {
@@ -578,7 +591,15 @@ void Player::Update() {
 		else if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			StartRoll();
 		}
-
+		// (新規追加) 弾発射入力のチェック (Cキー)
+		else if (Input::GetInstance()->TriggerKey(DIK_C)) {
+			// Bulletのインスタンスを生成
+			Bullet* newBullet = new Bullet();
+			// 弾を初期化 (初期位置はプレイヤーの中心、向きは現在の進行方向)
+			newBullet->Initialize(nullptr, worldTransform_.translation_, lrDirection_);
+			// 生成した弾を一時リストに追加
+			bullets_.push_back(newBullet);
+		}
 		// どちらも開始しなかった場合のみ、通常の物理演算を行う
 		else {
 			// 移動入力(02_07 スライド10枚目)
@@ -606,7 +627,7 @@ void Player::Update() {
 
 			// 接地判定
 			UpdateOnGround(collisionMapInfo);
-
+			
 			// 旋回制御
 			if (turnTimer_ > 0.0f) {
 				// タイマーを進める
@@ -628,8 +649,11 @@ void Player::Update() {
 // --- Player::Draw ---
 void Player::Draw() {
 
-	// モデル描画
-	model_->Draw(worldTransform_, *camera_);
+	if (IsAlive()) {
+
+		// モデル描画
+		model_->Draw(worldTransform_, *camera_);
+	}
 }
 
 // --- Player::GetWorldPosition ---
@@ -693,6 +717,15 @@ void Player::OnCollision(const Enemy* enemy) {
 	}
 
 	(void)enemy;
+
+	// HPを減らす
+	hp_ -= kDamageValue;
+
+	// 処理が分かりやすいようにHPが0を下回らないようにする
+	hp_ = std::max(hp_, 0);
+
+	
+
 	// ジャンプ初速
 	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 }

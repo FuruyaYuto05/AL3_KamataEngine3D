@@ -7,6 +7,7 @@
 #include "skydome.h"
 #include <vector>
 #include "DeathParticles.h"
+#include "Bullet.h"
 
 // ゲームシーンクラス
 class GameScene {
@@ -83,4 +84,7 @@ private:
 	KamataEngine::WorldTransform attackAABB_worldTransform_; 
 	bool isAttackAABBDrawn_ = false;                         
 
+	// (新規追加) 弾関連
+	KamataEngine::Model* bullet_model_ = nullptr; // 弾のモデル
+	std::list<Bullet*> bullets_;                  // 弾のリスト
 };

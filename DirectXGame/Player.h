@@ -8,7 +8,7 @@ class MapChipField;
 
 // 02_10 21枚目
 class Enemy;
-
+class Bullet; 
 class Player {
 public:
 	// 左右
@@ -51,12 +51,22 @@ public:
 	bool IsInvincible() const { return isInvincible_; }// 無敵中か
 	bool IsAttacking() const { return isAttacking_; }// 攻撃中か
 
+	// (新規追加) プレイヤーのHPを取得
+	int32_t GetHP() const { return hp_; }
+	// (新規追加) プレイヤーが生きているか（HPが0より大きいか）
+	bool IsAlive() const { return hp_ > 0; }
+
 	AABB GetAttackAABB() const;
 	LRDirection GetDirection() const { return lrDirection_; }
 
 	
 	float attackTimer_ = 0.0f;                       
 	static inline const float kAttackDuration = 0.1f; 
+
+	// プレイヤーから弾のリストを取得
+	std::list<Bullet*>& GetBullets() { return bullets_; }
+	// 新しい弾があれば、リストから取り除く (GameScene側で呼び出す)
+	std::list<Bullet*> PopNewBullets();
 
 private:
 	// ワールド変換データ
@@ -159,4 +169,14 @@ private:
 	static inline const float kAttenuationWall = 0.2f;
 	// ２段ジャンプできるかのフラグ
 	bool can2Jump_ = false;
+
+	// プレイヤーが生成した弾のリスト (GameSceneへ渡すために一時的に保持)
+	std::list<Bullet*> bullets_;
+
+	// --- HP関連 --- (新規追加)
+	int32_t hp_ = 0;                              // 現在のHP
+	static inline const int32_t kMaxHP = 10;      // 最大HP (初期値)
+	static inline const int32_t kDamageValue = 1; // 敵の接触や弾で受けるダメージ
+
+
 };

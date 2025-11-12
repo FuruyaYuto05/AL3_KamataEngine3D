@@ -29,6 +29,13 @@ GameScene::~GameScene() {
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
+
+	// (新規追加) 弾の削除
+	for (Bullet* bullet : bullets_) {
+		delete bullet;
+	}
+	bullets_.clear();
+
 }
 
 void GameScene::Initialize() {
@@ -117,6 +124,9 @@ void GameScene::Initialize() {
 	deathParticles_ = new DeathParticles;
 	deathParticles_->Initialize(deathParticles_model_, &camera_, playerPosition);
 
+	//弾モデル
+	bullet_model_ = Model::CreateFromOBJ("bullet");
+
 }
 
 void GameScene::GenerateBlocks() {
@@ -157,6 +167,29 @@ void GameScene::Update() {
 	for (Enemy* enemy : enemies_) {
 		enemy->Update();
 	}
+
+	// (新規追加) 弾の生成と更新
+	// 1. プレイヤーから生成された弾を取得し、全体のリストに追加
+	std::list<Bullet*> newBullets = player_->PopNewBullets();
+	for (Bullet* newBullet : newBullets) {
+		// Bulletのモデルを設定
+		newBullet->Initialize(bullet_model_, newBullet->GetWorldTransform().translation_, player_->GetDirection());
+		bullets_.push_back(newBullet);
+	}
+
+	// 2. 弾の更新
+	for (Bullet* bullet : bullets_) {
+		bullet->Update();
+	}
+
+	// 3. 寿命が尽きた弾を削除
+	bullets_.remove_if([](Bullet* bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
+		}
+		return false;
+	});
 
 #ifdef _DEBUG
 	//if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -262,6 +295,10 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 
+	// (新規追加) 弾の描画
+	for (Bullet* bullet : bullets_) {
+		bullet->Draw(camera_);
+	}
 
 	// --- 攻撃判定のデバッグ描画 ---
 	if (isAttackAABBDrawn_) {
