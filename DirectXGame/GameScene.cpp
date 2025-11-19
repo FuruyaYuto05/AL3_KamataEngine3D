@@ -118,11 +118,11 @@ void GameScene::Initialize() {
 	}
 
 	// 02_11 16枚目 敵モデル
-	deathParticles_model_ = Model::CreateFromOBJ("deathParticle");
+	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
 
 	// 02_11 16枚目
-	deathParticles_ = new DeathParticles;
-	deathParticles_->Initialize(deathParticles_model_, &camera_, playerPosition);
+	//deathParticles_ = new DeathParticles;
+	//deathParticles_->Initialize(deathParticle_model_, &camera_, playerPosition);
 	
 	//弾モデル
 	bullet_model_ = Model::CreateFromOBJ("bullet");
