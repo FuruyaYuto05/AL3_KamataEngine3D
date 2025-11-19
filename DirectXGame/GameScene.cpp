@@ -20,7 +20,7 @@ GameScene::~GameScene() {
 	delete modelSkydome_;
 	delete mapChipField_;
 	delete deathParticles_;
-	
+	delete deathParticle_model_;
 
 	// 02_09 10枚目 敵クラス削除→02_10 6枚目で削除
 	//	delete enemies_;
@@ -123,10 +123,10 @@ void GameScene::Initialize() {
 	// 02_11 16枚目
 	deathParticles_ = new DeathParticles;
 	deathParticles_->Initialize(deathParticles_model_, &camera_, playerPosition);
-
+	
 	//弾モデル
 	bullet_model_ = Model::CreateFromOBJ("bullet");
-
+	phase_ = Phase::kPlay;
 }
 
 void GameScene::GenerateBlocks() {
@@ -154,8 +154,47 @@ void GameScene::GenerateBlocks() {
 	}
 }
 
+
+void GameScene::ChangePhase() {
+
+	switch (phase_) {
+	case Phase::kPlay:
+		// 02_12 13枚目 if文から中身まで全部実装
+		// Initialize関数のいきなりパーティクル発生処理は消す
+		if (player_->IsDead()) {
+			// 死亡演出
+			phase_ = Phase::kDeath;
+
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+
+			deathParticles_ = new DeathParticles;
+			deathParticles_->Initialize(deathParticle_model_, &camera_, deathParticlesPosition);
+		}
+		break;
+	case Phase::kDeath:
+		break;
+	}
+}
+
+
 // ゲームシーン更新
 void GameScene::Update() {
+
+	ChangePhase();
+
+	switch (phase_) {
+	case Phase::kPlay:
+		// ゲームプレイフェーズの処理
+		break;
+	case Phase::kDeath:
+		// 02_12 34枚目 デス演出フェーズの処理
+		// deathParticles_->IsFinished関数をDeathParticles.hに実装
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
+
+		break;
+	}
 
 	player_->Update();
 	skydome_->Update();
@@ -254,10 +293,12 @@ void GameScene::Update() {
 	// 02_10 22枚目 衝突判定
 	CheckAllCollisions();
 
-	// 02_11 18枚目
-	/*if (deathParticles_) {
+	
+
+	// 02_11 18枚目 デスパーティクルあれば更新
+	if (deathParticles_) {
 		deathParticles_->Update();
-	}*/
+	}
 }
 
 void GameScene::Draw() {
@@ -274,10 +315,12 @@ void GameScene::Draw() {
 	// 天球描画
 	skydome_->Draw();
 
-	// 02_11 18枚目
-	/*if (deathParticles_) {
-		deathParticles_->Draw();
-	}*/
+
+		// 02_11 18枚目
+		if (deathParticles_) {
+			deathParticles_->Draw();
+		}
+	
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {

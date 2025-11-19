@@ -572,6 +572,11 @@ void Player::Update() {
 
 	const float deltaTime = 1.0f / 60.0f; // デルタタイム
 
+	if (!IsAlive()) {
+		WorldTransformUpdate(worldTransform_); // 念のためワールド行列更新だけは残すか、削除する
+		return;                                // 全ての移動・入力・タイマー処理を終了
+	}
+
 	// 1. ローリング中の処理を最優先
 	if (isRolling_) {
 		HandleRoll(deltaTime);
@@ -724,7 +729,9 @@ void Player::OnCollision(const Enemy* enemy) {
 	// 処理が分かりやすいようにHPが0を下回らないようにする
 	hp_ = std::max(hp_, 0);
 
-	
+	if (hp_ <= 0) {
+		isDead_ = true; // 死亡フラグを立てる
+	}
 
 	// ジャンプ初速
 	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);

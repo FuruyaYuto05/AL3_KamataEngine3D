@@ -26,6 +26,8 @@ public:
 
 	// 02_10 16枚目 衝突判定と応答
 	void CheckAllCollisions();
+
+	bool IsFinished() const { return finished_; }
 	
 private:
 	// テクスチャハンドル
@@ -79,6 +81,9 @@ private:
 	DeathParticles* deathParticles_ = nullptr;
 	KamataEngine::Model* deathParticles_model_ = nullptr;
 
+	// 02_11 16枚目
+	Model* deathParticle_model_ = nullptr;
+
 	// --- 攻撃判定デバッグ描画用 ---
 	KamataEngine::Model* attackAABB_model_ = nullptr;        
 	KamataEngine::WorldTransform attackAABB_worldTransform_; 
@@ -87,4 +92,18 @@ private:
 	// (新規追加) 弾関連
 	KamataEngine::Model* bullet_model_ = nullptr; // 弾のモデル
 	std::list<Bullet*> bullets_;                  // 弾のリスト
+
+		enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+
+ //ゲームの現在フェーズ（変数）
+	    Phase phase_;
+
+	    // 02_12 9枚目
+	    void ChangePhase();
+
+		// 02_12 26枚目
+	    bool finished_ = false;
 };

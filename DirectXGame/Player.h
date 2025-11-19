@@ -51,10 +51,14 @@ public:
 	bool IsInvincible() const { return isInvincible_; }// 無敵中か
 	bool IsAttacking() const { return isAttacking_; }// 攻撃中か
 
-	// (新規追加) プレイヤーのHPを取得
+	//  プレイヤーのHPを取得
 	int32_t GetHP() const { return hp_; }
-	// (新規追加) プレイヤーが生きているか（HPが0より大きいか）
+	//  プレイヤーが生きているか（HPが0より大きいか）
 	bool IsAlive() const { return hp_ > 0; }
+
+	// 死亡フラグを取得するGetterを追加
+	bool IsDead() const { return isDead_; }
+
 
 	AABB GetAttackAABB() const;
 	LRDirection GetDirection() const { return lrDirection_; }
@@ -175,8 +179,8 @@ private:
 
 	// --- HP関連 --- (新規追加)
 	int32_t hp_ = 0;                              // 現在のHP
-	static inline const int32_t kMaxHP = 10;      // 最大HP (初期値)
+	static inline const int32_t kMaxHP = 1;      // 最大HP (初期値)
 	static inline const int32_t kDamageValue = 1; // 敵の接触や弾で受けるダメージ
 
-
+	bool isDead_ = false;
 };
