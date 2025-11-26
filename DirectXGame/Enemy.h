@@ -2,6 +2,8 @@
 
 #include "KamataEngine.h"
 #include "MyMath.h"
+#include "EnemyBullet.h"
+#include <list>
 
 using namespace KamataEngine;
 
@@ -26,6 +28,18 @@ public:
 	void OnCollision(const Player* player);
 	// --- プレイヤーの攻撃を受けた際の応答 ---
 	void OnHitByPlayerAttack(const Player* player);
+
+
+	// プレイヤーをセットする関数を追加
+	void SetPlayer(Player* player) { player_ = player; }
+
+	// モデルをセットする関数を追加
+	void SetBulletModel(Model* model) { bulletModel_ = model; }
+
+	// 発射した弾のリストを取得（当たり判定などで使う）
+	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
+
+	~Enemy();
 
 private:
 	// 02_09 6枚目 ザ・ワールド
@@ -53,5 +67,16 @@ private:
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
 
+	// --- 発射機能用 ---
+	Player* player_ = nullptr;        // プレイヤーへのポインタ
+	std::list<EnemyBullet*> bullets_; // 発射した弾のリスト
+	Model* bulletModel_ = nullptr;
+
+	static inline const int kFireInterval = 120; // 発射間隔（フレーム数：例 2秒）
+	int32_t fireTimer_ = 0;
+	static inline const float kBulletSpeed = 0.1f; // 弾の速度
+
+	// 弾を発射する関数
+	void Fire();
 
 };

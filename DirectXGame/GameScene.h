@@ -68,7 +68,7 @@ private:
 	MapChipField* mapChipField_;
 
 	// 02_06カメラ移動
-	CameraController* CController_ = nullptr;
+	CameraController* CameraController_ = nullptr;
 
 	// 02_09 10枚目 エネミークラス
 	// Enemy* enemy_ = nullptr;//02_10で削除
@@ -89,9 +89,12 @@ private:
 	KamataEngine::WorldTransform attackAABB_worldTransform_; 
 	bool isAttackAABBDrawn_ = false;                         
 
-	// (新規追加) 弾関連
+	// 弾関連
 	KamataEngine::Model* bullet_model_ = nullptr; // 弾のモデル
 	std::list<Bullet*> bullets_;                  // 弾のリスト
+
+	KamataEngine::Model* enemy_bullet_model_ = nullptr; // 敵の弾のモデル
+	std::list<Bullet*> enemy_bullets_;                  // 敵の弾のリスト
 
 		enum class Phase {
 		kPlay,  // ゲームプレイ

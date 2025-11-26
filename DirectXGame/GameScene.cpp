@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "MyMath.h"
+#include "EnemyBullet.h"
 
 using namespace KamataEngine;
 
@@ -29,6 +30,9 @@ GameScene::~GameScene() {
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
+
+	// ★追加: 敵の弾モデルの削除
+	delete enemy_bullet_model_;
 
 	// (新規追加) 弾の削除
 	for (Bullet* bullet : bullets_) {
@@ -89,14 +93,14 @@ void GameScene::Initialize() {
 	player_->Initialize(player_model_, &camera_, playerPosition);
 
 	// 02_06カメラコントローラ スライド13枚目
-	CController_ = new CameraController(); // 生成
-	CController_->Initialize(&camera_);    // 初期化
-	CController_->SetTarget(player_);      // 追従対象セット
-	CController_->Reset();                 // リセット
+	CameraController_ = new CameraController(); // 生成
+	CameraController_->Initialize(&camera_);    // 初期化
+	CameraController_->SetTarget(player_);      // 追従対象セット
+	CameraController_->Reset();                 // リセット
 
 	// 02_06カメラコントローラ スライド18枚目
 	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
-	CController_->SetMovableArea(cameraArea);
+	CameraController_->SetMovableArea(cameraArea);
 
 	// 02_09 10枚目 敵クラス → 02_10の5枚目で削除
 	//	enemy_ = new Enemy();
@@ -106,6 +110,9 @@ void GameScene::Initialize() {
 	//	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
 	// enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
 
+// ★追加: 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
+	enemy_bullet_model_ = Model::CreateFromOBJ("bullet");
+
 	// 02_10 5枚目（for文の中身全部）
 	for (int32_t i = 0; i < 2; ++i) {
 		Enemy* newEnemy = new Enemy();
@@ -114,8 +121,13 @@ void GameScene::Initialize() {
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 
+		// ★追加: 敵にプレイヤーの情報と、今回作った弾モデルを渡す
+		newEnemy->SetPlayer(player_);
+		newEnemy->SetBulletModel(enemy_bullet_model_);
+
 		enemies_.push_back(newEnemy);
 	}
+
 
 	// 02_11 16枚目 敵モデル
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
@@ -198,7 +210,7 @@ void GameScene::Update() {
 
 	player_->Update();
 	skydome_->Update();
-	CController_->Update();
+	CameraController_->Update();
 	
 
 	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
@@ -380,6 +392,19 @@ void GameScene::CheckAllCollisions() {
 				player_->OnCollision(enemy);
 				// 敵弾の衝突時コールバックを呼び出す
 				enemy->OnCollision(player_);
+			}
+			// ★追加: 自キャラと「この敵が撃った弾」の当たり判定
+			const auto& enemyBullets = enemy->GetBullets(); // 敵から弾リストをもらう
+			for (EnemyBullet* bullet : enemyBullets) {
+				// 弾のAABBを取得
+				AABB bulletAABB = bullet->GetAABB();
+
+				if (IsCollision(aabb1, bulletAABB)) {
+					// プレイヤーにダメージ (引数は撃った敵)
+					player_->OnCollision(enemy);
+					// 弾を消す
+					bullet->OnCollision();
+				}
 			}
 		}
 	}
