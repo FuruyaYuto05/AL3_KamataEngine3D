@@ -31,10 +31,10 @@ GameScene::~GameScene() {
 		delete enemy;
 	}
 
-	// ★追加: 敵の弾モデルの削除
+	// 敵の弾モデルの削除
 	delete enemy_bullet_model_;
 
-	// (新規追加) 弾の削除
+	// 弾の削除
 	for (Bullet* bullet : bullets_) {
 		delete bullet;
 	}
@@ -109,8 +109,8 @@ void GameScene::Initialize() {
 	// 02_09 10枚目 敵位置決めて敵クラス初期化 → 02_10の5枚目で削除
 	//	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
 	// enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
-
-// ★追加: 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
+	
+	// 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
 	enemy_bullet_model_ = Model::CreateFromOBJ("bullet");
 
 	// 02_10 5枚目（for文の中身全部）
@@ -121,7 +121,7 @@ void GameScene::Initialize() {
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 
-		// ★追加: 敵にプレイヤーの情報と、今回作った弾モデルを渡す
+		// 敵にプレイヤーの情報と、今回作った弾モデルを渡す
 		newEnemy->SetPlayer(player_);
 		newEnemy->SetBulletModel(enemy_bullet_model_);
 
@@ -393,7 +393,7 @@ void GameScene::CheckAllCollisions() {
 				// 敵弾の衝突時コールバックを呼び出す
 				enemy->OnCollision(player_);
 			}
-			// ★追加: 自キャラと「この敵が撃った弾」の当たり判定
+			// 自キャラと「この敵が撃った弾」の当たり判定
 			const auto& enemyBullets = enemy->GetBullets(); // 敵から弾リストをもらう
 			for (EnemyBullet* bullet : enemyBullets) {
 				// 弾のAABBを取得

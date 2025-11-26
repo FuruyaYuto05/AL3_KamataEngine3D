@@ -2,7 +2,7 @@
 #include <cassert>
 
 void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
-	// NULLチェック
+	
 	assert(model);
 	model_ = model;
 
