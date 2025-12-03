@@ -4,6 +4,7 @@
 #include "MyMath.h"
 #include "EnemyBullet.h"
 #include <list>
+#include "MapChipField.h"
 
 using namespace KamataEngine;
 
@@ -41,6 +42,13 @@ public:
 
 	~Enemy();
 
+	void SetMapChipField(MapChipField* map) { mapChipField_ = map; }
+
+	MapChipField* mapChipField_ = nullptr;
+
+	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorner };
+
+
 private:
 	// 02_09 6枚目 ザ・ワールド
 	WorldTransform worldTransform_;
@@ -66,6 +74,7 @@ private:
 	// 02_10 14枚目 当たり判定サイズ
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+	static inline const float kBlank = 0.04f;
 
 	// --- 発射機能用 ---
 	Player* player_ = nullptr;        // プレイヤーへのポインタ
@@ -78,5 +87,33 @@ private:
 
 	// 弾を発射する関数
 	void Fire();
+
+	struct CollisionMapInfo {
+		bool ceiling = false;
+		bool landing = false;
+		bool hitWall = false;
+		Vector3 move;
+	};
+
+	Vector3 CornerPosition(const Vector3& center, Corner corner);
+
+	void CheckMapCollision(CollisionMapInfo& info);
+
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+	//void CheckMapCollisionUP(CollisionMapInfo& info);
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
+
+	//// 設置状態の切り替え処理
+	//void UpdateOnGround(const CollisionMapInfo& info);
+
+	//// 壁接触している場合の処理
+	//void UpdateOnWall(const CollisionMapInfo& info);
+
+	//static inline const float kAttenuationWall = 0.2f;
+	//static inline const float kAttenuationLanding = 0.0f;
+	//static inline const float kGroundSearchHeight = 0.06f;
+	//bool can2Jump_ = false;
+	//bool onGround_ = true;
 
 };
