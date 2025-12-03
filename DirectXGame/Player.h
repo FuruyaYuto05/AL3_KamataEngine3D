@@ -127,6 +127,13 @@ private:
 	bool isAttacking_ = false;                        // 攻撃中か
 	static inline const float kAttackCoolDown = 0.3f; // 攻撃アニメーションと硬直の総時間
 
+	// --- チャージショット関連 ---
+	bool isCharging_ = false;                        // チャージ中か？
+	float chargeTime_ = 0.0f;                        // チャージ時間
+	static inline const float kChargeTimeMax = 2.0f; // 最大1.5秒チャージ
+	bool prevCKey_ = false;                          // Cキー長押しの前フレーム状態
+
+
 	// 攻撃の当たり判定のサイズとオフセット
 	static inline const float kAttackWidth = 1.2f;
 	static inline const float kAttackHeight = 1.0f;

@@ -9,6 +9,8 @@
 #include "DeathParticles.h"
 #include "Bullet.h"
 
+using namespace KamataEngine;
+
 // ゲームシーンクラス
 class GameScene {
 public:
@@ -33,13 +35,13 @@ private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
 	// スプライト
-	KamataEngine::Sprite* sprite_ = nullptr;
+	Sprite* sprite_ = nullptr;
 	// 3Dモデル
-	KamataEngine::Model* model_ = nullptr;
+	Model* model_ = nullptr;
 	// ワールドトランスフォーム
-	KamataEngine::WorldTransform worldTransform_;
+	WorldTransform worldTransform_;
 	// カメラ
-	KamataEngine::Camera camera_;
+	Camera camera_;
 	// サウンドデータハンドル
 	uint32_t soundDataHandle_ = 0;
 	// 音声再生ハンドル
@@ -49,16 +51,16 @@ private:
 	//  プレイヤー
 	Player* player_ = nullptr;
 	// プレイヤーモデル
-	KamataEngine::Model* player_model_ = nullptr;
+	Model* player_model_ = nullptr;
 
 	// ブロックモデル
-	KamataEngine::Model* block_model_ = nullptr;
+	Model* block_model_ = nullptr;
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
 	// デバッグカメラ有効
 	bool isDebugCameraActive_ = false;
 	// デバッグカメラ
-	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+	DebugCamera* debugCamera_ = nullptr;
 
 	// 02_03 天球
 	Skydome* skydome_ = nullptr;
@@ -73,30 +75,30 @@ private:
 	// 02_09 10枚目 エネミークラス
 	// Enemy* enemy_ = nullptr;//02_10で削除
 	// 02_09 10枚目 エネミーモデル
-	KamataEngine::Model* enemy_model_ = nullptr;
+	Model* enemy_model_ = nullptr;
 	// 02_10 4枚目
 	std::list<Enemy*> enemies_;
 
 	// 02_11 15枚目
 	DeathParticles* deathParticles_ = nullptr;
-	KamataEngine::Model* deathParticles_model_ = nullptr;
+	Model* deathParticles_model_ = nullptr;
 
 	// 02_11 16枚目
 	Model* deathParticle_model_ = nullptr;
 
 	// --- 攻撃判定デバッグ描画用 ---
-	KamataEngine::Model* attackAABB_model_ = nullptr;        
-	KamataEngine::WorldTransform attackAABB_worldTransform_; 
+	Model* attackAABB_model_ = nullptr;        
+	WorldTransform attackAABB_worldTransform_; 
 	bool isAttackAABBDrawn_ = false;                         
 
 	// 弾関連
-	KamataEngine::Model* bullet_model_ = nullptr; // 弾のモデル
+	Model* bullet_model_ = nullptr; // 弾のモデル
 	std::list<Bullet*> bullets_;                  // 弾のリスト
 
-	KamataEngine::Model* enemy_bullet_model_ = nullptr; // 敵の弾のモデル
+	Model* enemy_bullet_model_ = nullptr; // 敵の弾のモデル
 	std::list<Bullet*> enemy_bullets_;                  // 敵の弾のリスト
 
-		enum class Phase {
+	enum class Phase {
 		kPlay,  // ゲームプレイ
 		kDeath, // デス演出
 	};

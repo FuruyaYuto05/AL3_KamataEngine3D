@@ -567,76 +567,118 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
 
-// --- Player::Update ---
 void Player::Update() {
 
-	const float deltaTime = 1.0f / 60.0f; // デルタタイム
+	const float deltaTime = 1.0f / 60.0f;
 
 	if (!IsAlive()) {
-		WorldTransformUpdate(worldTransform_); // 念のためワールド行列更新だけは残すか、削除する
-		return;                                // 全ての移動・入力・タイマー処理を終了
+		WorldTransformUpdate(worldTransform_);
+		return;
 	}
 
-	// 1. ローリング中の処理を最優先
+	Input* input = Input::GetInstance();
+
+	// 現在のCキー状態
+	bool cNow = input->PushKey(DIK_C);
+
+	// 1. ローリング中の処理
 	if (isRolling_) {
 		HandleRoll(deltaTime);
 	}
-	// 2. 攻撃中の処理を次に優先
+	// 2. 攻撃中の処理
 	else if (isAttacking_) {
 		HandleAttack(deltaTime);
 	}
-
-	// 3. ローリング/攻撃中でない場合の処理（通常時）
+	// 3. 通常時
 	else {
-		// 攻撃入力のチェック
-		if (Input::GetInstance()->TriggerKey(DIK_Z)) { // Zキーで攻撃
+
+		// ────────────────────────────────────
+		//   チャージショット処理 
+		// ────────────────────────────────────
+
+		// チャージ開始（押した瞬間）
+		if (!isCharging_ && input->TriggerKey(DIK_C)) {
+			isCharging_ = true;
+			chargeTime_ = 0.0f;
+		}
+
+		// チャージ中（押している間）
+		if (isCharging_ && cNow) {
+			chargeTime_ += deltaTime;
+			if (chargeTime_ > kChargeTimeMax) {
+				chargeTime_ = kChargeTimeMax;
+			}
+		}
+
+		// 単発かチャージか
+		// キー離し判定（前フレーム押していた & 今フレーム離した）
+		if (isCharging_ && prevCKey_ && !cNow) {
+
+			isCharging_ = false;
+
+			Bullet* newBullet = new Bullet();
+			newBullet->Initialize(nullptr, worldTransform_.translation_, lrDirection_);
+
+			// 0.25秒未満 → 通常ショット
+			if (chargeTime_ < 0.25f) {
+
+				bullets_.push_back(newBullet);
+			}
+			// 0.25秒以上 → チャージショット
+			else {
+				float t = chargeTime_ / kChargeTimeMax;
+
+				// サイズを大きくする
+				float scale = 0.2f + t * 0.8f;
+				newBullet->SetScale({scale, scale, scale});
+
+				// 速度強化
+				float speed = 0.3f + t * 0.6f;
+				newBullet->SetSpeed(speed);
+
+				bullets_.push_back(newBullet);
+			}
+		}
+
+		// ────────────────────────────────────
+		//   攻撃 / ローリング / 移動 
+		// ────────────────────────────────────
+
+		// 攻撃
+		if (input->TriggerKey(DIK_Z)) {
 			StartAttack();
 		}
-		// ローリング入力のチェック
-		else if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		// ローリング
+		else if (input->TriggerKey(DIK_SPACE)) {
 			StartRoll();
 		}
-		// (新規追加) 弾発射入力のチェック (Cキー)
-		else if (Input::GetInstance()->TriggerKey(DIK_C)) {
-			// Bulletのインスタンスを生成
-			Bullet* newBullet = new Bullet();
-			// 弾を初期化 (初期位置はプレイヤーの中心、向きは現在の進行方向)
-			newBullet->Initialize(nullptr, worldTransform_.translation_, lrDirection_);
-			// 生成した弾を一時リストに追加
-			bullets_.push_back(newBullet);
-		}
-		// どちらも開始しなかった場合のみ、通常の物理演算を行う
+		// 通常移動
 		else {
-			// 移動入力(02_07 スライド10枚目)
+
 			InputMove();
 
-			// 衝突情報を初期化(02_07 スライド13枚目)
 			CollisionMapInfo collisionMapInfo = {};
 			collisionMapInfo.move = velocity_;
 			collisionMapInfo.landing = false;
 			collisionMapInfo.hitWall = false;
 
-			// マップ衝突チェック(02_07 スライド13枚目)
+			// マップ衝突
 			CheckMapCollision(collisionMapInfo);
 
-			// 移動(02_07 スライド36枚目)
+			// 移動適用
 			worldTransform_.translation_ += collisionMapInfo.move;
 
-			// 天井接触による落下開始(02_07 スライド38枚目)
 			if (collisionMapInfo.ceiling) {
 				velocity_.y = 0;
 			}
 
-			// 02_08 スライド27枚目 壁接触している場合の処理
 			UpdateOnWall(collisionMapInfo);
 
-			// 接地判定
 			UpdateOnGround(collisionMapInfo);
-			
-			// 旋回制御
+
+			// 旋回処理
 			if (turnTimer_ > 0.0f) {
-				// タイマーを進める
-				turnTimer_ = std::max(turnTimer_ - deltaTime, 0.0f); // 1.0f / 60.0f を deltaTime に変更
+				turnTimer_ = std::max(turnTimer_ - deltaTime, 0.0f);
 
 				float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 
@@ -647,9 +689,14 @@ void Player::Update() {
 		}
 	}
 
-	// ワールド行列更新（ローリング中も攻撃中も通常時も実行）
+
+	// 前フレームのCキー状態を更新
+	prevCKey_ = cNow;
+
+	// 行列更新
 	WorldTransformUpdate(worldTransform_);
 }
+
 
 // --- Player::Draw ---
 void Player::Draw() {

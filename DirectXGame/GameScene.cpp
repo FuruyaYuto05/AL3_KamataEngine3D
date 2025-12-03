@@ -224,7 +224,7 @@ void GameScene::Update() {
 	std::list<Bullet*> newBullets = player_->PopNewBullets();
 	for (Bullet* newBullet : newBullets) {
 		// Bulletのモデルを設定
-		newBullet->Initialize(bullet_model_, newBullet->GetWorldTransform().translation_, player_->GetDirection());
+		newBullet->SetModel(bullet_model_);
 		bullets_.push_back(newBullet);
 	}
 

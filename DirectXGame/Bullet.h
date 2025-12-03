@@ -26,6 +26,20 @@ public:
 
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
+	// サイズ調整
+	void SetScale(const Vector3& scale) { worldTransform_.scale_ = scale; }
+
+	// スピード調整
+    void SetSpeed(float speed) {
+		if (velocity_.x > 0)
+			velocity_.x = speed;
+		else
+			velocity_.x = -speed;
+	}
+
+	// モデル設定
+	void SetModel(Model* model) { model_ = model; }
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
