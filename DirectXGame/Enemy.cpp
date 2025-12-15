@@ -7,6 +7,7 @@
 #include <numbers>
 #include <cmath>
 #include "MapChipField.h"
+#include <algorithm>
 
 // デストラクタ追加
 Enemy::~Enemy() {
@@ -84,63 +85,62 @@ void Enemy::Fire() {
 	}
 }
 
-//void Enemy::UpdateOnGround(const CollisionMapInfo& info) {
-//
-//	if (onGround_) {
-//		// 02_08スライド18枚目 ジャンプ開始
-//		if (velocity_.y > 0.0f) {
-//			onGround_ = false;
-//		} else {
-//			// 落下判定
-//			// 落下なら空中状態に切り替え
-//
-//			// 02_08スライド19枚目(このelseブロック全部)
-//			std::array<Vector3, kNumCorner> positionsNew;
-//
-//			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
-//				positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
-//			}
-//
-//			bool hit = false;
-//
-//			MapChipType mapChipType;
-//
-//			// 左下点の判定
-//			IndexSet indexSet;
-//			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom] + Vector3(0, -kGroundSearchHeight, 0));
-//			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-//			if (mapChipType == MapChipType::kBlock) {
-//				hit = true;
-//			}
-//
-//			// 右下点の判定
-//			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom] + Vector3(0, -kGroundSearchHeight, 0));
-//			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-//			if (mapChipType == MapChipType::kBlock) {
-//				hit = true;
-//			}
-//
-//			// 落下開始
-//			if (!hit) {
-//				//				DebugText::GetInstance()->ConsolePrintf("jump");
-//				onGround_ = false;
-//			}
-//		}
-//	} else {
-//		// 02_08スライド16枚目 地面に接触している場合の処理
-//		if (info.landing) {
-//			// 着地状態に切り替える（落下を止める）
-//			onGround_ = true;
-//			// 着地時にX速度を減衰
-//			velocity_.x *= (1.0f - kAttenuationLanding);
-//			// Y速度をゼロに
-//			velocity_.y = 0.0f;
-//
-//			can2Jump_ = true;
-//		}
-//	}
-//}
-//
+void Enemy::UpdateOnGround(const CollisionMapInfo& info) {
+
+	if (onGround_) {
+		// 02_08スライド18枚目 ジャンプ開始
+		if (velocity_.y > 0.0f) {
+			onGround_ = false;
+		} else {
+			// 落下判定
+			// 落下なら空中状態に切り替え
+
+			// 02_08スライド19枚目(このelseブロック全部)
+			std::array<Vector3, kNumCorner> positionsNew;
+
+			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+				positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+			}
+
+			bool hit = false;
+
+			MapChipType mapChipType;
+
+			// 左下点の判定
+			IndexSet indexSet;
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom] + Vector3(0, -kGroundSearchHeight, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipType::kBlock) {
+				hit = true;
+			}
+
+			// 右下点の判定
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom] + Vector3(0, -kGroundSearchHeight, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipType::kBlock) {
+				hit = true;
+			}
+
+			// 落下開始
+			if (!hit) {
+				//				DebugText::GetInstance()->ConsolePrintf("jump");
+				onGround_ = false;
+			}
+		}
+	} else {
+		// 02_08スライド16枚目 地面に接触している場合の処理
+		if (info.landing) {
+			// 着地状態に切り替える（落下を止める）
+			onGround_ = true;
+			// 着地時にX速度を減衰
+			velocity_.x *= (1.0f - kAttenuationLanding);
+			// Y速度をゼロに
+			velocity_.y = 0.0f;
+
+		}
+	}
+}
+
 //// 壁接地中の処理
 //void Enemy::UpdateOnWall(const CollisionMapInfo& info) {
 //
@@ -160,21 +160,38 @@ void Enemy::Update() {
 	// ワールド行列更新
 	WorldTransformUpdate(worldTransform_);
 
-	/*CollisionMapInfo collisionMapInfo = {};
+	CollisionMapInfo collisionMapInfo = {};
 	collisionMapInfo.move = velocity_;
 	collisionMapInfo.landing = false;
-	collisionMapInfo.hitWall = false;*/
-
-	// 移動
-	worldTransform_.translation_ += velocity_;
-	//worldTransform_.translation_ += collisionMapInfo.move;
+	collisionMapInfo.hitWall = false;
 
 	// マップ衝突
-	//CheckMapCollision(collisionMapInfo);
+	CheckMapCollision(collisionMapInfo);
 
-	/*UpdateOnWall(collisionMapInfo);
+	// 移動
+	//worldTransform_.translation_ += velocity_;
+	worldTransform_.translation_ += collisionMapInfo.move;
 
-	UpdateOnGround(collisionMapInfo);*/
+	// 地上にいるとき
+	if (onGround_) {
+		// Playerの追尾
+		if (collisionMapInfo.hitWall) {
+			// ジャンプ初速
+			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+		}
+	} else {
+	
+		// 落下速度
+		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
+		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+
+		// 空中での速度制限
+		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+	}
+
+	//UpdateOnWall(collisionMapInfo);
+
+	UpdateOnGround(collisionMapInfo);
 
 	// --- 発射ロジック ---
 	fireTimer_--;
@@ -390,7 +407,7 @@ void Enemy::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	}
 
 	MapChipType mapChipType;
-	// 右側の当たり判定
+	// 左側の当たり判定
 	bool hit = false;
 
 	// 左上点の判定

@@ -113,11 +113,13 @@ void GameScene::Initialize() {
 	// 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
 	enemy_bullet_model_ = Model::CreateFromOBJ("bullet");
 
+	
+
 	// 02_10 5枚目（for文の中身全部）
-	for (int32_t i = 0; i < 2; ++i) {
+	for (int32_t i = 0; i < 1; ++i) {
 		Enemy* newEnemy = new Enemy();
 
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(20 + i * 2, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 
@@ -125,9 +127,11 @@ void GameScene::Initialize() {
 		newEnemy->SetPlayer(player_);
 		newEnemy->SetBulletModel(enemy_bullet_model_);
 
+		newEnemy->SetMapChipField(mapChipField_);
+
 		enemies_.push_back(newEnemy);
 	}
-
+	
 
 	// 02_11 16枚目 敵モデル
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");

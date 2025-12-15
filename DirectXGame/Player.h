@@ -186,7 +186,7 @@ private:
 
 	// --- HP関連 --- (新規追加)
 	int32_t hp_ = 0;                              // 現在のHP
-	static inline const int32_t kMaxHP = 1;      // 最大HP (初期値)
+	static inline const int32_t kMaxHP = 100;      // 最大HP (初期値)
 	static inline const int32_t kDamageValue = 1; // 敵の接触や弾で受けるダメージ
 
 	bool isDead_ = false;
