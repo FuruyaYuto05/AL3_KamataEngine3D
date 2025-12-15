@@ -48,6 +48,7 @@ public:
 
 	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorner };
 
+	bool IsDead() const { return isDead_; }
 
 private:
 	// 02_09 6枚目 ザ・ワールド
@@ -76,12 +77,12 @@ private:
 	static inline const float kHeight = 0.8f;
 	static inline const float kBlank = 0.04f;
 
-	// --- 発射機能用 ---
+	// 発射機能用
 	Player* player_ = nullptr;        // プレイヤーへのポインタ
 	std::list<EnemyBullet*> bullets_; // 発射した弾のリスト
 	Model* bulletModel_ = nullptr;
 
-	static inline const int kFireInterval = 120; // 発射間隔（フレーム数：例 2秒）
+	static inline const int kFireInterval = 120; // 発射間隔
 	int32_t fireTimer_ = 0;
 	static inline const float kBulletSpeed = 0.1f; // 弾の速度
 
@@ -116,11 +117,23 @@ private:
 	//bool can2Jump_ = false;
 	bool onGround_ = true;
 
-	//playerの追尾
+	//playerの追尾(まだ)
 	bool tracked_ = true;
 	static inline const float kJumpAcceleration = 20.0f;
 	static inline const float kGravityAcceleration = 0.98f;
 	static inline const float kLimitFallSpeed = 0.5f;
 	// 最高速度
 	static inline const float kLimitRunSpeed = 0.3f;
+
+	// HP関連
+	int hp_ = 3;          // 敵のHP
+	bool isDead_ = false; // 死亡フラグ
+
+	// ノックバック関連
+	bool isKnockback_ = false;
+	float knockbackTimer_ = 0.0f;
+	static inline const float kKnockbackDuration = 0.2f; 
+	Vector3 knockbackVelocity_ = {};
+
+
 };

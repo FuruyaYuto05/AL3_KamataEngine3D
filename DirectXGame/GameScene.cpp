@@ -42,6 +42,8 @@ GameScene::~GameScene() {
 
 }
 
+bool IsAABBCollide(const AABB& a, const AABB& b) { return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.y <= b.max.y && a.max.y >= b.min.y && a.min.z <= b.max.z && a.max.z >= b.min.z; }
+
 void GameScene::Initialize() {
 
 	// ファイル名を指定してテクスチャを読み込む
@@ -232,6 +234,36 @@ void GameScene::Update() {
 		bullets_.push_back(newBullet);
 	}
 
+	// ─────────────────────────────
+	// プレイヤーの弾 vs 敵
+	// ─────────────────────────────
+	for (Bullet* bullet : bullets_) {
+
+		if (!bullet || bullet->IsDead()) {
+			continue;
+		}
+
+		AABB bulletAABB = bullet->GetAABB();
+
+		for (Enemy* enemy : enemies_) {
+
+			if (!enemy)
+				continue;
+
+			AABB enemyAABB = enemy->GetAABB();
+
+			if (IsAABBCollide(bulletAABB, enemyAABB)) {
+
+				enemy->OnHitByPlayerAttack(player_);
+				bullet->SetDead(true);
+
+				break;
+			}
+		}
+	}
+
+
+
 	// 2. 弾の更新
 	for (Bullet* bullet : bullets_) {
 		bullet->Update();
@@ -315,6 +347,17 @@ void GameScene::Update() {
 	if (deathParticles_) {
 		deathParticles_->Update();
 	}
+
+	// ─────────────────────────────
+	// HP0 の敵を削除
+	// ─────────────────────────────
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true;
+		}
+		return false;
+	});
 }
 
 void GameScene::Draw() {

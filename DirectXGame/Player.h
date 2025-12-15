@@ -69,7 +69,6 @@ public:
 
 	// プレイヤーから弾のリストを取得
 	std::list<Bullet*>& GetBullets() { return bullets_; }
-	// 新しい弾があれば、リストから取り除く (GameScene側で呼び出す)
 	std::list<Bullet*> PopNewBullets();
 
 private:
@@ -111,7 +110,7 @@ private:
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;
 
-	// --- ローリング機能関連 ---
+	// ローリング機能関連 
 	bool isRolling_ = false;          // ローリング中か
 	bool isInvincible_ = false;       // 無敵状態か
 	float currentRollTime_ = 0.0f;    // ローリング開始からの経過時間
@@ -123,11 +122,11 @@ private:
 	static inline const float kRollDuration = 0.3f;
 	static inline const float kRollRotationX = std::numbers::pi_v<float> * 2.0f * 2.0f; // 2周分
 
-	// --- 近接攻撃機能関連 ---
+	// 近接攻撃機能関連
 	bool isAttacking_ = false;                        // 攻撃中か
 	static inline const float kAttackCoolDown = 0.3f; // 攻撃アニメーションと硬直の総時間
 
-	// --- チャージショット関連 ---
+	// チャージショット関連
 	bool isCharging_ = false;                        // チャージ中か？
 	float chargeTime_ = 0.0f;                        // チャージ時間
 	static inline const float kChargeTimeMax = 2.0f; // 最大1.5秒チャージ
@@ -142,7 +141,7 @@ private:
 	// 02_07スライド10枚目 移動入力
 	void InputMove();
 
-	// --- 攻撃・回避メソッド ---
+	// 攻撃・回避メソッド
 	void StartRoll();                   // ローリングを開始する処理
 	void HandleRoll(float deltaTime);   // ローリング中の移動と終了処理
 	void StartAttack();                 // 攻撃を開始する処理
@@ -181,13 +180,15 @@ private:
 	// ２段ジャンプできるかのフラグ
 	bool can2Jump_ = false;
 
-	// プレイヤーが生成した弾のリスト (GameSceneへ渡すために一時的に保持)
+	// プレイヤーが生成した弾のリスト 
 	std::list<Bullet*> bullets_;
 
-	// --- HP関連 --- (新規追加)
+	// HP関連  
 	int32_t hp_ = 0;                              // 現在のHP
-	static inline const int32_t kMaxHP = 100;      // 最大HP (初期値)
+	static inline const int32_t kMaxHP = 5;      // 最大HP 
 	static inline const int32_t kDamageValue = 1; // 敵の接触や弾で受けるダメージ
 
 	bool isDead_ = false;
+
+
 };

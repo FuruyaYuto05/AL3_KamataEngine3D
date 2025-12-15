@@ -63,3 +63,21 @@ void Bullet::Draw(const Camera& camera) { // <- Camera& camera を引数に追�
 		model_->Draw(worldTransform_, camera);
 	}
 }
+
+AABB Bullet::GetAABB() const {
+
+	// 弾のワールド座標
+	Vector3 worldPos;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+
+	// 弾サイズ（見た目と合わせる）
+	const float halfSize = 0.2f;
+
+	AABB aabb;
+	aabb.min = {worldPos.x - halfSize, worldPos.y - halfSize, worldPos.z - halfSize};
+	aabb.max = {worldPos.x + halfSize, worldPos.y + halfSize, worldPos.z + halfSize};
+
+	return aabb;
+}

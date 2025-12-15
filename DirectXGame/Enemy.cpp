@@ -38,7 +38,11 @@ void Enemy::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	// 02_09 20枚目
 	walkTimer = 0.0f;
 
+	// 弾を撃つ間隔
 	fireTimer_ = kFireInterval;
+
+    hp_ = 3;
+	isDead_ = false;
 }
 
 // 弾発射関数
@@ -154,6 +158,29 @@ void Enemy::Update() {
 
 	walkTimer += 1.0f / 60.0f;
 
+	// ─────────────────────────────
+	// ノックバック中の処理（最優先）
+	// ─────────────────────────────
+	if (isKnockback_) {
+
+		CollisionMapInfo info = {};
+		info.move = knockbackVelocity_;
+
+		// マップとの衝突を考慮
+		CheckMapCollision(info);
+
+		// 移動
+		worldTransform_.translation_ += info.move;
+
+		// タイマー更新
+		knockbackTimer_ -= 1.0f / 60.0f;
+		if (knockbackTimer_ <= 0.0f) {
+			isKnockback_ = false;
+		}
+		
+		WorldTransformUpdate(worldTransform_);
+		return;
+	}
 	// 回転アニメーション
 	worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
 
@@ -268,22 +295,36 @@ void Enemy::OnCollision(const Player* player) {
 // --- プレイヤーの攻撃を受けた際の応答 ---
 void Enemy::OnHitByPlayerAttack(const Player* player) {
 
-	// ノックバックの強さ
-	const float knockbackSpeedX = 0.1f;  // 水平方向の初速
-	const float knockbackSpeedY = 0.05f; // 垂直方向の初速
-
-	// プレイヤーの向きを取得し、ノックバック方向を決定
-	if (player->GetDirection() == Player::LRDirection::kRight) {
-		// プレイヤーが右を向いて攻撃 -> 敵は右にノックバック
-		velocity_.x = knockbackSpeedX;
-	} else {
-		// プレイヤーが左を向いて攻撃 -> 敵は左にノックバック
-		velocity_.x = -knockbackSpeedX;
+	// すでにノックバック中なら再ヒットさせない（多段防止）
+	if (isKnockback_) {
+		return;
 	}
 
-	velocity_.y = knockbackSpeedY;
+	// ── ノックバック開始 ──
+	isKnockback_ = true;
+	knockbackTimer_ = kKnockbackDuration;
 
+	const float knockbackSpeedX = 0.1f;
+	const float knockbackSpeedY = 0.05f;
 
+	// プレイヤーの向きで吹き飛ぶ方向を決める
+	if (player->GetDirection() == Player::LRDirection::kRight) {
+		knockbackVelocity_ = {knockbackSpeedX, knockbackSpeedY, 0.0f};
+	} else {
+		knockbackVelocity_ = {-knockbackSpeedX, knockbackSpeedY, 0.0f};
+	}
+
+	// ── HPを減らす ──
+	hp_--;
+
+#ifdef _DEBUG
+	DebugText::GetInstance()->ConsolePrintf("Enemy HP: %d\n", hp_);
+#endif
+
+	// ── HP0で死亡 ──
+	if (hp_ <= 0) {
+		isDead_ = true;
+	}
 }
 
 void Enemy::CheckMapCollision(CollisionMapInfo& info) {

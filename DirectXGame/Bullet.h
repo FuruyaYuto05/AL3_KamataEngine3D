@@ -40,6 +40,13 @@ public:
 	// モデル設定
 	void SetModel(Model* model) { model_ = model; }
 
+	// 弾の当たり判定
+	AABB GetAABB() const;
+
+	// 弾を消す
+	void SetDead(bool dead) { isDead_ = dead; }
+
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;

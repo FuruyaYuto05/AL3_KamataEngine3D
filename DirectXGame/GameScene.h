@@ -111,4 +111,6 @@ private:
 
 		// 02_12 26枚目
 	    bool finished_ = false;
+
+
 };
