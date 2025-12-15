@@ -225,7 +225,7 @@ void GameScene::Update() {
 		enemy->Update();
 	}
 
-	// (新規追加) 弾の生成と更新
+	// 弾の生成と更新
 	// 1. プレイヤーから生成された弾を取得し、全体のリストに追加
 	std::list<Bullet*> newBullets = player_->PopNewBullets();
 	for (Bullet* newBullet : newBullets) {
@@ -397,7 +397,7 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 
-	// (新規追加) 弾の描画
+	// 弾の描画
 	for (Bullet* bullet : bullets_) {
 		bullet->Draw(camera_);
 	}
