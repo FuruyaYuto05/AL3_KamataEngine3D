@@ -181,6 +181,33 @@ void Enemy::Update() {
 		WorldTransformUpdate(worldTransform_);
 		return;
 	}
+
+    // ─────────────────────────────
+	// プレイヤー追尾（ノックバック中は上でreturnしてるのでここに来ない）
+	// ─────────────────────────────
+	if (player_) {
+		Vector3 enemyPos = GetWorldPosition();
+		Vector3 playerPos = player_->GetWorldPosition();
+
+		float dx = playerPos.x - enemyPos.x;
+
+		// 近すぎると止まる距離（好みで調整）
+		const float kStopDistance = 0.3f;
+
+		// 地上にいる時だけ追尾で左右移動を決める（ジャンプ中に空中制御させないため）
+		if (onGround_) {
+			if (std::fabs(dx) > kStopDistance) {
+				velocity_.x = (dx > 0.0f) ? kWalkSpeed : -kWalkSpeed;
+
+				// 向きも合わせる（左向き: 3π/2, 右向き: π/2）
+				worldTransform_.rotation_.y = (dx > 0.0f) ? (std::numbers::pi_v<float> * 0.5f) : (std::numbers::pi_v<float> * 1.5f);
+			} else {
+				velocity_.x = 0.0f; // 近いなら停止
+			}
+		}
+	}
+
+
 	// 回転アニメーション
 	worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
 
@@ -241,6 +268,7 @@ void Enemy::Update() {
 	for (EnemyBullet* bullet : bullets_) {
 		bullet->Update();
 	}
+
 
 }
 
