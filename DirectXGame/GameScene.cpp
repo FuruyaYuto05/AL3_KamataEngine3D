@@ -42,6 +42,8 @@ GameScene::~GameScene() {
 
 }
 
+bool IsAABBCollide(const AABB& a, const AABB& b) { return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.y <= b.max.y && a.max.y >= b.min.y && a.min.z <= b.max.z && a.max.z >= b.min.z; }
+
 void GameScene::Initialize() {
 
 	// ファイル名を指定してテクスチャを読み込む
@@ -113,11 +115,13 @@ void GameScene::Initialize() {
 	// 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
 	enemy_bullet_model_ = Model::CreateFromOBJ("bullet");
 
+	
+
 	// 02_10 5枚目（for文の中身全部）
-	for (int32_t i = 0; i < 2; ++i) {
+	for (int32_t i = 0; i < 1; ++i) {
 		Enemy* newEnemy = new Enemy();
 
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(20 + i * 2, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 
@@ -125,9 +129,11 @@ void GameScene::Initialize() {
 		newEnemy->SetPlayer(player_);
 		newEnemy->SetBulletModel(enemy_bullet_model_);
 
+		newEnemy->SetMapChipField(mapChipField_);
+
 		enemies_.push_back(newEnemy);
 	}
-
+	
 
 	// 02_11 16枚目 敵モデル
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
@@ -219,7 +225,7 @@ void GameScene::Update() {
 		enemy->Update();
 	}
 
-	// (新規追加) 弾の生成と更新
+	// 弾の生成と更新
 	// 1. プレイヤーから生成された弾を取得し、全体のリストに追加
 	std::list<Bullet*> newBullets = player_->PopNewBullets();
 	for (Bullet* newBullet : newBullets) {
@@ -227,6 +233,36 @@ void GameScene::Update() {
 		newBullet->SetModel(bullet_model_);
 		bullets_.push_back(newBullet);
 	}
+
+	// ─────────────────────────────
+	// プレイヤーの弾 vs 敵
+	// ─────────────────────────────
+	for (Bullet* bullet : bullets_) {
+
+		if (!bullet || bullet->IsDead()) {
+			continue;
+		}
+
+		AABB bulletAABB = bullet->GetAABB();
+
+		for (Enemy* enemy : enemies_) {
+
+			if (!enemy)
+				continue;
+
+			AABB enemyAABB = enemy->GetAABB();
+
+			if (IsAABBCollide(bulletAABB, enemyAABB)) {
+
+				enemy->OnHitByPlayerAttack(player_);
+				bullet->SetDead(true);
+
+				break;
+			}
+		}
+	}
+
+
 
 	// 2. 弾の更新
 	for (Bullet* bullet : bullets_) {
@@ -311,6 +347,17 @@ void GameScene::Update() {
 	if (deathParticles_) {
 		deathParticles_->Update();
 	}
+
+	// ─────────────────────────────
+	// HP0 の敵を削除
+	// ─────────────────────────────
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true;
+		}
+		return false;
+	});
 }
 
 void GameScene::Draw() {
@@ -350,7 +397,7 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 
-	// (新規追加) 弾の描画
+	// 弾の描画
 	for (Bullet* bullet : bullets_) {
 		bullet->Draw(camera_);
 	}
