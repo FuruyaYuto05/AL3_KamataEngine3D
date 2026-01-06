@@ -269,11 +269,33 @@ void Enemy::Update() {
 		bullet->Update();
 	}
 
+	if (isDying_) {
+		if (deathParticles_) {
+			deathParticles_->Update();
+			if (deathParticles_->IsFinished()) {
+				isDead_ = true; // GameSceneがdeleteしてOK
+			}
+		} else {
+			isDead_ = true;
+		}
+		return;
+	}
+
 
 }
 
 // 02_09 スライド5枚目
 void Enemy::Draw() {
+
+	if (isDying_) {
+		if (deathParticles_) {
+			deathParticles_->Draw();
+		}
+		return;
+	}
+	if (isDead_)
+		return;
+
 
 	// 02_09 スライド9枚目  モデル描画
 	model_->Draw(worldTransform_, *camera_);
@@ -351,9 +373,31 @@ void Enemy::OnHitByPlayerAttack(const Player* player) {
 
 	// ── HP0で死亡 ──
 	if (hp_ <= 0) {
-		isDead_ = true;
+		StartDeath();
 	}
 }
+
+void Enemy::StartDeath() {
+	if (isDying_ || isDead_)
+		return;
+
+	isDying_ = true;
+
+	velocity_ = {0, 0, 0};
+	isKnockback_ = false;
+
+	for (EnemyBullet* bullet : bullets_) {
+		delete bullet;
+	}
+	bullets_.clear();
+
+	if (deathParticleModel_ && camera_) {
+		delete deathParticles_;
+		deathParticles_ = new DeathParticles();
+		deathParticles_->Initialize(deathParticleModel_, camera_, GetWorldPosition());
+	}
+}
+
 
 void Enemy::CheckMapCollision(CollisionMapInfo& info) {
 

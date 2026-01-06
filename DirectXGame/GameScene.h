@@ -31,6 +31,12 @@ public:
 
 	bool IsFinished() const { return finished_; }
 	
+	
+
+		// 終了ステータスを外部へ
+	enum class EndStatus { None, GameOver, GameClear, Reset };
+	EndStatus GetEndStatus() const { return endStatus_; }
+
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
@@ -110,7 +116,9 @@ private:
 	    void ChangePhase();
 
 		// 02_12 26枚目
+	    // クリア時
 	    bool finished_ = false;
+	    EndStatus endStatus_ = EndStatus::None;
 
 
 };

@@ -5,6 +5,8 @@
 #include "EnemyBullet.h"
 #include <list>
 #include "MapChipField.h"
+#include "DeathParticles.h"
+
 
 using namespace KamataEngine;
 
@@ -49,6 +51,20 @@ public:
 	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorner };
 
 	bool IsDead() const { return isDead_; }
+
+	void SetDeathParticleModel(Model* model) { deathParticleModel_ = model; }
+
+	bool IsDying() const { return isDying_; }
+	bool IsReadyToRemove() const { return isDead_; }
+
+	//int hp_ = 3;
+	bool isDying_ = false; // 演出中
+	//bool isDead_ = false;  // 演出終了後に削除OK
+
+	Model* deathParticleModel_ = nullptr;
+	DeathParticles* deathParticles_ = nullptr;
+
+	void StartDeath();
 
 private:
 	// 02_09 6枚目 ザ・ワールド

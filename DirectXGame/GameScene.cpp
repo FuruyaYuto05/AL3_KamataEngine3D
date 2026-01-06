@@ -115,7 +115,8 @@ void GameScene::Initialize() {
 	// 敵の弾用モデルの生成 (objファイル名は "bullet" としていますが、別のファイルがあれば書き換えてください)
 	enemy_bullet_model_ = Model::CreateFromOBJ("bullet");
 
-	
+	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
+
 
 	// 02_10 5枚目（for文の中身全部）
 	for (int32_t i = 0; i < 1; ++i) {
@@ -130,6 +131,9 @@ void GameScene::Initialize() {
 		newEnemy->SetBulletModel(enemy_bullet_model_);
 
 		newEnemy->SetMapChipField(mapChipField_);
+
+		newEnemy->SetDeathParticleModel(deathParticle_model_);
+
 
 		enemies_.push_back(newEnemy);
 	}
@@ -177,6 +181,9 @@ void GameScene::ChangePhase() {
 
 	switch (phase_) {
 	case Phase::kPlay:
+		if (!player_) {
+			return;
+		}
 		// 02_12 13枚目 if文から中身まで全部実装
 		// Initialize関数のいきなりパーティクル発生処理は消す
 		if (player_->IsDead()) {
@@ -352,7 +359,7 @@ void GameScene::Update() {
 	// HP0 の敵を削除
 	// ─────────────────────────────
 	enemies_.remove_if([](Enemy* enemy) {
-		if (enemy->IsDead()) {
+		if (enemy->IsReadyToRemove()) {
 			delete enemy;
 			return true;
 		}
@@ -430,6 +437,11 @@ void GameScene::CheckAllCollisions() {
 
 		// 自キャラと敵弾全ての当たり判定
 		for (Enemy* enemy : enemies_) {
+
+			if (enemy->IsDying() || enemy->IsReadyToRemove()) {
+				continue;
+			}
+
 			// 敵弾の座標
 			aabb2 = enemy->GetAABB();
 
