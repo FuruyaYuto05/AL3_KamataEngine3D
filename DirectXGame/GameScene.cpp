@@ -25,7 +25,7 @@ GameScene::~GameScene() {
 
 	// 02_09 10枚目 敵クラス削除→02_10 6枚目で削除
 	//	delete enemies_;
-
+	
 	// 02_10 6枚目 敵クラス削除
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
@@ -205,6 +205,17 @@ void GameScene::ChangePhase() {
 // ゲームシーン更新
 void GameScene::Update() {
 
+	// ===== 敵HPが0ならゲームクリア（即遷移）=====
+	for (Enemy* enemy : enemies_) {
+		if (enemy && enemy->GetHP() <= 0) {
+			endStatus_ = EndStatus::GameClear;
+			finished_ = true;
+			return;
+		}
+	}
+	// ============================================
+
+
 	ChangePhase();
 
 	switch (phase_) {
@@ -365,6 +376,18 @@ void GameScene::Update() {
 		}
 		return false;
 	});
+
+	  // ① 自機HPが0ならゲームオーバー
+	if (player_ && player_->GetHP() <= 0) {
+		endStatus_ = EndStatus::GameOver;
+		return;
+	}
+	
+
+
+
+	
+
 }
 
 void GameScene::Draw() {

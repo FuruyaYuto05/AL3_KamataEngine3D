@@ -66,6 +66,11 @@ public:
 
 	void StartDeath();
 
+	int deathTimer = 20;
+
+	int32_t GetHP() const { return hp_; }
+
+
 private:
 	// 02_09 6枚目 ザ・ワールド
 	WorldTransform worldTransform_;
@@ -151,5 +156,5 @@ private:
 	static inline const float kKnockbackDuration = 0.2f; 
 	Vector3 knockbackVelocity_ = {};
 
-
+	
 };

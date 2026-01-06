@@ -208,6 +208,7 @@ void Enemy::Update() {
 	}
 
 
+
 	// 回転アニメーション
 	worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
 
@@ -268,8 +269,11 @@ void Enemy::Update() {
 	for (EnemyBullet* bullet : bullets_) {
 		bullet->Update();
 	}
-
+	if (hp_ <= 0) {
+		deathTimer--; 
+	}
 	if (isDying_) {
+		
 		if (deathParticles_) {
 			deathParticles_->Update();
 			if (deathParticles_->IsFinished()) {
@@ -281,6 +285,7 @@ void Enemy::Update() {
 		return;
 	}
 
+	
 
 }
 
