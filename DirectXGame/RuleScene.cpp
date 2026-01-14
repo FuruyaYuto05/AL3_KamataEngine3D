@@ -13,8 +13,8 @@ RuleScene::~RuleScene() {
 }
 
 void RuleScene::Initialize() {
-	// textureHandle_ = TextureManager::Load("ruleScene.png");
-	//textureHandleRuleGuide_ = TextureManager::Load("playing.png");
+	//textureHandle_ = TextureManager::Load("ruleScene.png");
+	textureHandleRuleGuide_ = TextureManager::Load("playing.png");
 	//textureHandleArrowRight_ = TextureManager::Load("GuideArrowRight.png");
 	//textureHandleArrowLeft_ = TextureManager::Load("GuideArrowLeft.png");
 

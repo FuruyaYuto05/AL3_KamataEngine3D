@@ -124,10 +124,10 @@ void Player::InputMove() {
 	Input::GetInstance()->GetJoystickState(0, state);
 
 	// 左スティックのX軸の値を取得
-	short thumbX = state.Gamepad.sThumbLX;
+	//short thumbX = state.Gamepad.sThumbLX;
 
 	// デッドゾーンを設定
-	const short DEADZONE = 16000;
+	//const short DEADZONE = 16000;
 
 	// 優先度制御用のフラグ
 	bool keyboardInputX = false;
@@ -170,47 +170,6 @@ void Player::InputMove() {
 			velocity_ += acceleration;
 		}
 
-		// キーボード入力がない場合のみ、コントローラーのスティック入力をチェック
-		if (!keyboardInputX) {
-
-			// スティックが右に倒されているかチェック
-			if (thumbX > DEADZONE) {
-				// スティックの傾きを0.0～1.0の範囲に正規化
-				float normalizedX = (float)(thumbX - DEADZONE) / (32767.0f - DEADZONE);
-
-				if (velocity_.x < 0.0f) {
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
-
-				// 旋回処理
-				if (lrDirection_ != LRDirection::kRight) {
-					lrDirection_ = LRDirection::kRight;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = kTimeTurn;
-				}
-			}
-			// スティックが左に倒されているかチェック
-			else if (thumbX < -DEADZONE) {
-				// スティックの傾きを0.0～-1.0の範囲に正規化
-				float normalizedX = (float)(thumbX + DEADZONE) / (32767.0f - DEADZONE);
-
-				if (velocity_.x > 0.0f) {
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
-
-				// 旋回処理
-				if (lrDirection_ != LRDirection::kLeft) {
-					lrDirection_ = LRDirection::kLeft;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = kTimeTurn;
-				}
-			} else {
-				// キーボードもスティックも入力がない場合は減衰をかける
-				velocity_.x *= (1.0f - kAttenuation);
-			}
-		}
 
 		// 速度の制限
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
@@ -221,7 +180,7 @@ void Player::InputMove() {
 		}
 
 		// 一段目ジャンプ操作（DIK_UP または Aボタン）
-		if (Input::GetInstance()->TriggerKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		if (Input::GetInstance()->TriggerKey(DIK_UP) ) {
 			// ジャンプ初速
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
@@ -229,15 +188,15 @@ void Player::InputMove() {
 	} else {
 		// 空中での処理（落下速度と空中移動）
 
-		if (can2Jump_) {
-			if (Input::GetInstance()->TriggerKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
-				// 一段目のジャンプ速度をリセット
-				velocity_.y = 0.0f;
-				// ジャンプ初速
-				velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
-				can2Jump_ = false;
-			}
-		}
+		//if (can2Jump_) {
+		//	if (Input::GetInstance()->TriggerKey(DIK_UP) || (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		//		// 一段目のジャンプ速度をリセット
+		//		velocity_.y = 0.0f;
+		//		// ジャンプ初速
+		//		velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+		//		can2Jump_ = false;
+		//	}
+		//}
 		// 落下速度
 		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
@@ -256,17 +215,6 @@ void Player::InputMove() {
 			}
 		}
 
-		// キーボード入力がない場合のみコントローラーチェック
-		if (!keyboardInputX) {
-			// コントローラーによる空中移動
-			if (thumbX > DEADZONE) {
-				float normalizedX = (float)(thumbX - DEADZONE) / (32767.0f - DEADZONE);
-				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
-			} else if (thumbX < -DEADZONE) {
-				float normalizedX = (float)(thumbX + DEADZONE) / (32767.0f - DEADZONE);
-				velocity_.x += (kAcceleration / 60.0f) * normalizedX;
-			}
-		}
 
 		// 空中での速度制限
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);

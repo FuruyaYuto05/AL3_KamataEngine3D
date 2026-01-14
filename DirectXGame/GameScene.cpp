@@ -34,7 +34,7 @@ GameScene::~GameScene() {
 	// 敵の弾モデルの削除
 	delete enemy_bullet_model_;
 
-	// 弾の削除
+	// 弾の削除　　
 	for (Bullet* bullet : bullets_) {
 		delete bullet;
 	}
@@ -49,7 +49,7 @@ void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("sample.png");
 	// スプライト生成
-	sprite_ = Sprite::Create(textureHandle_, {100, 50});
+	sprite_ = Sprite::Create(textureHandle_, {70, 50});
 	// 3Dモデル生成
 	model_ = Model::Create();
 	// ワールドトランスフォーム初期化
@@ -383,7 +383,12 @@ void GameScene::Update() {
 		return;
 	}
 	
-
+	if (Input::GetInstance()->TriggerKey(DIK_R)) {
+		finished_ = true;
+		
+		endStatus_ = EndStatus::Reset;
+		return; // リセットが押されたら、このフレームの他の処理は中断
+	}
 
 
 	

@@ -61,7 +61,7 @@ void TitleScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
-	bgmDataHandle_ = Audio::GetInstance()->LoadWave("bgm.wav");
+	bgmDataHandle_ = Audio::GetInstance()->LoadWave("title.wav");
 	seDataHandle_ = Audio::GetInstance()->LoadWave("enter.wav");
 }
 
