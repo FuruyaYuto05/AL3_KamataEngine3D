@@ -105,6 +105,7 @@ private:
 	std::list<Bullet*> enemy_bullets_;                  // 敵の弾のリスト
 
 	enum class Phase {
+		kIntro, // 登場演出
 		kPlay,  // ゲームプレイ
 		kDeath, // デス演出
 	};
@@ -121,4 +122,11 @@ private:
 	    EndStatus endStatus_ = EndStatus::None;
 
 		bool isPaused_ = false; // ポーズ中かどうか
+
+		// 演出タイマー
+		float introTimer_ = 0.0f;
+
+		// 演出に書ける時間
+	    static inline const float kIntroDuration = 3.0f;
+
 };

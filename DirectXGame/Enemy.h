@@ -70,6 +70,8 @@ public:
 
 	int32_t GetHP() const { return hp_; }
 
+	// 登場演出用関数Enemy
+	void UpdateIntro();
 
 private:
 	// 02_09 6枚目 ザ・ワールド

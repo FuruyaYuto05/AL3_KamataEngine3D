@@ -148,7 +148,12 @@ void GameScene::Initialize() {
 	
 	//弾モデル
 	bullet_model_ = Model::CreateFromOBJ("bullet");
-	phase_ = Phase::kPlay;
+
+	phase_ = Phase::kIntro;
+
+	// 登場時の時間
+	introTimer_ = 0.0f;
+
 }
 
 void GameScene::GenerateBlocks() {
@@ -228,8 +233,71 @@ void GameScene::Update() {
 	ChangePhase();
 
 	switch (phase_) {
+	case Phase::kIntro:
+		// タイマー進める
+		introTimer_ += 1.0f / 60.0f;
+
+		//カメラ演出
+		if (player_) {
+		// プレイヤーの座標
+			Vector3 playerPos = player_->GetWorldPosition();
+
+		// カメラスタート地点
+			Vector3 startCameraPos = playerPos;
+			startCameraPos.y += 50.0f;
+			startCameraPos.z -= 50.0f;
+		// カメラ移動(元の位置に)
+			Vector3 endCameraPos = playerPos;
+			endCameraPos.y += 5.0f;
+			endCameraPos.z -= 15.0f;
+			
+		// 進行度
+			float rate = introTimer_ / kIntroDuration;
+
+			if (rate > 1.0f)
+				rate = 1.0f;
+
+		// イージング
+			float easeRate = 1.0f - pow(1.0f - rate, 3.0f);
+
+		// 線形補間を使ってカメラを移動
+			camera_.translation_.x = Lerp(startCameraPos.x, endCameraPos.x, easeRate);
+			camera_.translation_.y = Lerp(startCameraPos.y, endCameraPos.y, easeRate);
+			camera_.translation_.z = Lerp(startCameraPos.z, endCameraPos.z, easeRate);
+
+		// 行列更新
+			camera_.UpdateMatrix();
+
+		}
+
+		// プレイヤーと敵を「回転」させる（専用関数を呼ぶ）
+		if (player_) {
+			player_->UpdateIntro(); // ここで操作不能な回転処理だけ呼ぶ
+		}
+		for (Enemy* enemy : enemies_) {
+			enemy->UpdateIntro(); // 敵もAIを止めて回転だけさせる
+		}
+
+		skydome_->Update();
+
+		// 時間がたったらゲームプレイへ移動
+		if (introTimer_ >= kIntroDuration) {
+			phase_ = Phase::kPlay;
+			// カメラコントローラのリセット
+			if (CameraController_) {
+				CameraController_->Reset();
+			}
+		}
+		break;
+
 	case Phase::kPlay:
 		// ゲームプレイフェーズの処理
+		player_->Update();
+
+		
+		for (Enemy* enemy : enemies_) {
+			enemy->Update();
+		}
 		break;
 	case Phase::kDeath:
 		// 02_12 34枚目 デス演出フェーズの処理
@@ -241,17 +309,8 @@ void GameScene::Update() {
 		break;
 	}
 
-	player_->Update();
-	skydome_->Update();
 	CameraController_->Update();
 	
-
-	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
-	//	enemy_->Update();
-	for (Enemy* enemy : enemies_) {
-		enemy->Update();
-	}
-
 	// 弾の生成と更新
 	// 1. プレイヤーから生成された弾を取得し、全体のリストに追加
 	std::list<Bullet*> newBullets = player_->PopNewBullets();

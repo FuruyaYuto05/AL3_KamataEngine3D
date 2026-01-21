@@ -71,6 +71,9 @@ public:
 	std::list<Bullet*>& GetBullets() { return bullets_; }
 	std::list<Bullet*> PopNewBullets();
 
+	// 登場演出用関数Player
+	void UpdateIntro();
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;

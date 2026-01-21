@@ -102,9 +102,7 @@ void Player::HandleAttack(float deltaTime) {
 	
 	if (attackTimer_ >= kAttackCoolDown) {
 		isAttacking_ = false;
-	}
-
-	
+	}	
 }
 
 // --- Player::PopNewBullets ---
@@ -113,6 +111,15 @@ std::list<Bullet*> Player::PopNewBullets() {
 	std::list<Bullet*> result = std::move(bullets_);
 	bullets_.clear();
 	return result;
+}
+
+// 登場演出用関数Player
+void Player::UpdateIntro() {
+	// くるくる回る
+	worldTransform_.rotation_.y += 0.1f;
+
+	// 行列の更新だけ行う
+	WorldTransformUpdate(worldTransform_);
 }
 
 

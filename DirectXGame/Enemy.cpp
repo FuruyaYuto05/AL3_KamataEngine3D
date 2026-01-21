@@ -403,6 +403,15 @@ void Enemy::StartDeath() {
 	}
 }
 
+// 登場演出用関数Enemy
+void Enemy::UpdateIntro() {
+	// くるくる回る
+	worldTransform_.rotation_.y += 0.1f;
+
+	// 行列の更新だけ行う
+	WorldTransformUpdate(worldTransform_);
+}
+
 
 void Enemy::CheckMapCollision(CollisionMapInfo& info) {
 
