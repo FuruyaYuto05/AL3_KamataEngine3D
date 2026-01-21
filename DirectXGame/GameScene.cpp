@@ -205,6 +205,15 @@ void GameScene::ChangePhase() {
 // ゲームシーン更新
 void GameScene::Update() {
 
+	if (Input::GetInstance()->TriggerKey(DIK_P)) {
+		isPaused_ = !isPaused_; // trueとfalseを反転
+	}
+
+	// ポーズ中なら、更新処理を飛ばして終了（描画は続くので画面は止まって見える）
+	if (isPaused_) {
+		return;
+	}
+
 	// ===== 敵HPが0ならゲームクリア（即遷移）=====
 	for (Enemy* enemy : enemies_) {
 		if (enemy && enemy->GetHP() <= 0) {
@@ -390,9 +399,6 @@ void GameScene::Update() {
 		return; // リセットが押されたら、このフレームの他の処理は中断
 	}
 
-
-	
-
 }
 
 void GameScene::Draw() {
@@ -415,7 +421,6 @@ void GameScene::Draw() {
 			deathParticles_->Draw();
 		}
 	
-
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {

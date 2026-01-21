@@ -120,5 +120,5 @@ private:
 	    bool finished_ = false;
 	    EndStatus endStatus_ = EndStatus::None;
 
-
+		bool isPaused_ = false; // ポーズ中かどうか
 };

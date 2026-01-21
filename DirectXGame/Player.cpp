@@ -557,7 +557,7 @@ void Player::Update() {
 				chargeTime_ = kChargeTimeMax;
 			}
 		}
-
+		
 		// 単発かチャージか
 		// キー離し判定（前フレーム押していた & 今フレーム離した）
 		if (isCharging_ && prevCKey_ && !cNow) {
@@ -570,7 +570,7 @@ void Player::Update() {
 			// 0.25秒未満 → 通常ショット
 			if (chargeTime_ < 0.25f) {
 
-
+				
 				bullets_.push_back(newBullet);
 			}
 			// 0.25秒以上 → チャージショット

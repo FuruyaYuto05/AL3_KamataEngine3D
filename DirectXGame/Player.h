@@ -28,7 +28,7 @@ public:
 
 	/// 描画
 	void Draw();
-
+	
 	// getter(02_06スライド11枚目で追加)
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
@@ -109,7 +109,7 @@ private:
 	static inline const float kHeight = 0.8f;
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;
-
+	
 	// ローリング機能関連 
 	bool isRolling_ = false;          // ローリング中か
 	bool isInvincible_ = false;       // 無敵状態か
@@ -131,6 +131,9 @@ private:
 	float chargeTime_ = 0.0f;                        // チャージ時間
 	static inline const float kChargeTimeMax = 2.0f; // 最大1.5秒チャージ
 	bool prevCKey_ = false;                          // Cキー長押しの前フレーム状態
+	//bool isShot_ = false;                            // 弾が発射されたか
+	//float shotCoolDown = 0.0f;                       // 弾発射のクールダウン
+
 
 
 	// 攻撃の当たり判定のサイズとオフセット
