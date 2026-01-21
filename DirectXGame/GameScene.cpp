@@ -158,16 +158,16 @@ void GameScene::Initialize() {
 
 void GameScene::GenerateBlocks() {
 
-	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
+	uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
-	worldTransformBlocks_.resize(numBlockVirtical);
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	worldTransformBlocks_.resize(numBlockVertical);
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
 	}
 
 	// ブロックの生成
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
 
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 
@@ -211,7 +211,7 @@ void GameScene::ChangePhase() {
 void GameScene::Update() {
 
 	if (Input::GetInstance()->TriggerKey(DIK_P)) {
-		isPaused_ = !isPaused_; // trueとfalseを反転
+		isPaused_ = !isPaused_; 
 	}
 
 	// ポーズ中なら、更新処理を飛ばして終了（描画は続くので画面は止まって見える）
@@ -287,7 +287,13 @@ void GameScene::Update() {
 			if (CameraController_) {
 				CameraController_->Reset();
 			}
+
+			// 向きのリセット
+			if (player_) {
+				player_->OnIntroFinished();
+			}
 		}
+
 		break;
 
 	case Phase::kPlay:

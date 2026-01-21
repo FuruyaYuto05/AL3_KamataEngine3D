@@ -99,7 +99,7 @@ void Enemy::UpdateOnGround(const CollisionMapInfo& info) {
 			// 落下判定
 			// 落下なら空中状態に切り替え
 
-			// 02_08スライド19枚目(このelseブロック全部)
+			// 02_08スライド19枚目(このブロック全部)
 			std::array<Vector3, kNumCorner> positionsNew;
 
 			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
@@ -183,7 +183,7 @@ void Enemy::Update() {
 	}
 
     // ─────────────────────────────
-	// プレイヤー追尾（ノックバック中は上でreturnしてるのでここに来ない）
+	// プレイヤー追尾（ノックバック中は上でしてるのでここに来ない）
 	// ─────────────────────────────
 	if (player_) {
 		Vector3 enemyPos = GetWorldPosition();
@@ -277,7 +277,7 @@ void Enemy::Update() {
 		if (deathParticles_) {
 			deathParticles_->Update();
 			if (deathParticles_->IsFinished()) {
-				isDead_ = true; // GameSceneがdeleteしてOK
+				isDead_ = true; // GameScene
 			}
 		} else {
 			isDead_ = true;
@@ -325,7 +325,7 @@ AABB Enemy::GetAABB() {
 }
 
 // 02_10 スライド14枚目
-Vector3 Enemy::GetWorldPosition() {
+Vector3 Enemy::GetWorldPosition() const{
 
 	Vector3 worldPos;
 
@@ -406,7 +406,7 @@ void Enemy::StartDeath() {
 // 登場演出用関数Enemy
 void Enemy::UpdateIntro() {
 	// くるくる回る
-	worldTransform_.rotation_.y += 0.1f;
+	worldTransform_.rotation_.y += 0.3f;
 
 	// 行列の更新だけ行う
 	WorldTransformUpdate(worldTransform_);
@@ -429,7 +429,7 @@ void Enemy::CheckMapCollisionDown(CollisionMapInfo& info) {
 		return;
 	}
 
-	// 02_08 スライド7枚目（下のfor文も）
+	// 02_08 スライド7枚目（下の文も）
 	std::array<Vector3, kNumCorner> positionsNew;
 
 	for (uint32_t i = 0; i < positionsNew.size(); ++i) {

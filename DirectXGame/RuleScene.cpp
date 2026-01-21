@@ -55,21 +55,6 @@ void RuleScene::Update() {
 
 	case Phase::kMain:
 
-		// if (!drowingPicture_) {
-		//	if (Input::GetInstance()->TriggerKey(DIK_RIGHT)) {
-		//		drowingPicture_ = true;
-		//		if (!isPlaySe_) {
-		//	//		seHandle_ = Audio::GetInstance()->PlayWave(moveSeDataHandle_, false);
-		//		}
-		//	}
-		// } else {
-		//	if (Input::GetInstance()->TriggerKey(DIK_LEFT)) {
-		//		drowingPicture_ = false;
-		//		if (!isPlaySe_) {
-		////			seHandle_ = Audio::GetInstance()->PlayWave(moveSeDataHandle_, false);
-		//		}
-		//	}
-		//}
 
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
@@ -101,13 +86,9 @@ void RuleScene::Draw() {
 
 	Sprite::PreDraw(commandList);
 
-	// if (drowingPicture_) {
-	//	sprite_->Draw();
-	// spriteArrowLeft_->Draw();
-	// } else {
+	
 	spriteRuleGuide_->Draw();
-	//	spriteArrowRight_->Draw();
-	// }
+	
 
 	Sprite::PostDraw();
 

@@ -14,6 +14,8 @@ struct AABB {
 // 02_06のCameraControllerのUpdate/Reset関数で必要
 const Vector3 operator+(const Vector3& lhv, const Vector3& rhv);
 
+const Vector3 operator-(const Vector3& lhv, const Vector3& rhv);
+
 // 02_06のスライド24枚目のLerp関数
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 
@@ -55,3 +57,9 @@ float EaseInOut(float x1, float x2, float t);
 bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 
 Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
+
+// ベクトルの長さを求める
+float Length(const Vector3& v);
+
+// ベクトルを正規化する（長さを1にする）
+Vector3 Normalize(const Vector3& v);

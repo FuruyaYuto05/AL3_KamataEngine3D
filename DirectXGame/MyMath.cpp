@@ -14,6 +14,11 @@ const Vector3 operator+(const Vector3& v1, const Vector3& v2) {
 	return temp += v2;
 }
 
+const Vector3 operator-(const Vector3& v1, const Vector3& v2) {
+	Vector3 temp(v1);
+	return temp -= v2;
+}
+
 // 02_06のスライド24枚目のLerp関数
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) { return Vector3(Lerp(v1.x, v2.x, t), Lerp(v1.y, v2.y, t), Lerp(v1.z, v2.z, t)); }
 
@@ -182,3 +187,14 @@ Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	return result;
 }
 
+// ベクトルの長さを求める
+float Length(const Vector3& v) { return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
+
+// ベクトルを正規化する
+Vector3 Normalize(const Vector3& v) {
+	float len = Length(v);
+	if (len != 0) {
+		return v * (1.0f / len);
+	}
+	return v;
+}

@@ -41,7 +41,7 @@ private:
 	Sprite* spriteArrowLeft_ = nullptr;
 	uint32_t textureHandleArrowLeft_ = 0;
 
-	bool drowingPicture_ = false;
+	bool drawingPicture_ = false;
 
 	Fade* fade_ = nullptr;
 	Phase phase_ = Phase::kFadeIn;

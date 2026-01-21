@@ -31,7 +31,7 @@ public:
 	static inline const float kBlockWidth = 1.0f;
 	static inline const float kBlockHeight = 1.0f;
 	// ブロックの個数
-	static inline const uint32_t kNumBlockVirtical = 20;
+	static inline const uint32_t kNumBlockVertical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
 
 	void ResetMapChipDate();
@@ -42,7 +42,7 @@ public:
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
-	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
+	uint32_t GetNumBlockVertical() const { return kNumBlockVertical; }
 	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
 
 	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);

@@ -4,6 +4,7 @@
 #include "MapChipField.h"
 #include "MyMath.h"
 #include "Bullet.h"
+#include "Enemy.h"
 
 #include <algorithm>
 #include <cassert>
@@ -62,28 +63,47 @@ void Player::StartRoll() {
 // --- Player::HandleRoll ---
 void Player::HandleRoll(float deltaTime) {
 
-	// 1. 移動処理
-	worldTransform_.translation_ += rollDirection_ * kRollSpeed;
+	// 1. 移動量の計算
+	Vector3 move = rollDirection_ * kRollSpeed;
 
-	// 2. 時間の更新
+	// 2. 当たり判定用の構造体を作成
+	CollisionMapInfo collisionInfo;
+	collisionInfo.move = move; // 計算した移動量をセット
+	collisionInfo.landing = false;
+	collisionInfo.hitWall = false;
+
+	// 3. マップ衝突判定を行う (これで移動量 move が壁に合わせて補正されます)
+	CheckMapCollision(collisionInfo);
+
+	// 4. 補正された移動量を座標に加算
+	worldTransform_.translation_ += collisionInfo.move;
+
+	// 5. (オプション) 壁にぶつかったらローリングを強制終了させたい場合
+	// if (collisionInfo.hitWall) {
+	//    // 必要であればここで終了処理など
+	// }
+
+	// --- 以下、時間更新などの処理はそのまま ---
+
+	// 時間の更新
 	currentRollTime_ += deltaTime;
 
-	// 3. ローリング回転処理
+	// ローリング回転処理
 	float t = currentRollTime_ / kRollDuration;
-	t = std::min(t, 1.0f); 
+	t = std::min(t, 1.0f);
 	float destinationRotationX = rollFirstRotationX_ + kRollRotationX;
 	worldTransform_.rotation_.x = EaseInOut(rollFirstRotationX_, destinationRotationX, t);
 
-	// 4. ローリング終了のチェック
+	// ローリング終了のチェック
 	if (currentRollTime_ >= kRollDuration) {
 		// ローリングを終了する
 		isRolling_ = false;
-		isInvincible_ = false; 
+		isInvincible_ = false;
 		currentRollTime_ = 0.0f;
 
 		// 終了時の速度とX軸回転をリセット
 		velocity_ = {0.0f, 0.0f, 0.0f};
-		worldTransform_.rotation_.x = 0.0f; 
+		worldTransform_.rotation_.x = 0.0f;
 	}
 }
 
@@ -116,12 +136,22 @@ std::list<Bullet*> Player::PopNewBullets() {
 // 登場演出用関数Player
 void Player::UpdateIntro() {
 	// くるくる回る
-	worldTransform_.rotation_.y += 0.1f;
+	worldTransform_.rotation_.y += 0.3f;
 
 	// 行列の更新だけ行う
 	WorldTransformUpdate(worldTransform_);
 }
 
+void Player::OnIntroFinished() {
+	// 向きを「右（初期状態）」に戻す
+	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
+
+	// 念のため速度もリセット
+	velocity_ = {0.0f, 0.0f, 0.0f};
+
+	// 行列を更新して確定させる
+	WorldTransformUpdate(worldTransform_);
+}
 
 // --- Player::InputMove ---
 void Player::InputMove() {
@@ -247,14 +277,14 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 		return;
 	}
 
-	// 02_07 スライド19枚目（下のfor文も）
+	// 02_07 スライド19枚目（下の文も）
 	std::array<Vector3, kNumCorner> positionsNew;
 
 	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
 		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
 	}
 
-	// 02_07 スライド28枚目（下のfor文も）
+	// 02_07 スライド28枚目（下の文も）
 	MapChipType mapChipType;
 	// 真上の当たり判定を行う
 	bool hit = false;
@@ -299,7 +329,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 		return;
 	}
 
-	// 02_08 スライド7枚目（下のfor文も）
+	// 02_08 スライド7枚目（下の文も）
 	std::array<Vector3, kNumCorner> positionsNew;
 
 	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
@@ -452,7 +482,7 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 			// 落下判定
 			// 落下なら空中状態に切り替え
 
-			// 02_08スライド19枚目(このelseブロック全部)
+			// 02_08スライド19枚目(このブロック全部)
 			std::array<Vector3, kNumCorner> positionsNew;
 
 			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
@@ -716,7 +746,6 @@ AABB Player::GetAttackAABB() const {
 }
 
 // --- Player::OnCollision ---
-// 02_10 21枚目
 void Player::OnCollision(const Enemy* enemy) {
 
 	// 無敵状態なら、衝突応答をスキップ
@@ -724,18 +753,38 @@ void Player::OnCollision(const Enemy* enemy) {
 		return;
 	}
 
-	(void)enemy;
-
-	// HPを減らす
+	// 1. HPを減らす
 	hp_ -= kDamageValue;
-
-	// 処理が分かりやすいようにHPが0を下回らないようにする
 	hp_ = std::max(hp_, 0);
 
 	if (hp_ <= 0) {
-		isDead_ = true; // 死亡フラグを立てる
+		isDead_ = true;
 	}
 
-	// ジャンプ初速
-	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+	// ノックバック方向の計算
+	// 敵の位置と自分の位置を取得
+
+	Vector3 enemyPos = enemy->GetWorldPosition();
+	Vector3 playerPos = GetWorldPosition();
+
+	// 敵から自分へのベクトル（＝吹っ飛ぶ方向）
+	Vector3 knockbackDir = playerPos - enemyPos;
+	knockbackDir.y = 0.0f;                  // 上下方向の要素は一旦消す（真横に計算するため）
+	knockbackDir = Normalize(knockbackDir); // ベクトルを正規化（長さ1にする）
+
+	// もし位置が完全に重なっていて計算できない場合は、とりあえず右へ
+	if (Length(knockbackDir) == 0.0f) {
+		knockbackDir = {1.0f, 0.0f, 0.0f};
+	}
+
+	// ノックバック速度を与える
+	// 横方向の強さ
+	float knockbackPowerHorizontal = 0.3f; 
+	// 上方向の強さ（少し浮かせるとそれっぽい）
+	float knockbackPowerVertical = 0.2f;
+
+	velocity_.x = knockbackDir.x * knockbackPowerHorizontal;
+	velocity_.y = knockbackPowerVertical;
+
+
 }

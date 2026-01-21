@@ -13,9 +13,9 @@ std::map<std::string, MapChipType> mapChipTable = {
 
 }
 
-MapChipField::Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yindex) {
+MapChipField::Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yIndex) {
 	// 指定ブロックの中心座標を取得する
-	Vector3 center = GetMapChipPositionByIndex(xIndex, yindex);
+	Vector3 center = GetMapChipPositionByIndex(xIndex, yIndex);
 
 	Rect rect;
 	rect.left = center.x - kBlockWidth / 2.0f;
@@ -29,7 +29,7 @@ MapChipField::Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yindex
 void MapChipField::ResetMapChipDate() {
 	// マップチップデータをリセット
 	mapChipData_.data.clear();
-	mapChipData_.data.resize(kNumBlockVirtical);
+	mapChipData_.data.resize(kNumBlockVertical);
 	for (std::vector<MapChipType>& mapChipDateLine : mapChipData_.data) {
 		mapChipDateLine.resize(kNumBlockHorizontal);
 	}
@@ -50,7 +50,7 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	mapChipCsv << file.rdbuf();
 
 	// CSVからマップチップデータを読み込む
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
+	for (uint32_t i = 0; i < kNumBlockVertical; ++i) {
 		std::string line;
 		getline(mapChipCsv, line);
 
@@ -72,17 +72,17 @@ MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex
 	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
 		return MapChipType::kBlank;
 	}
-	if (yIndex < 0 || kNumBlockVirtical - 1 < yIndex) {
+	if (yIndex < 0 || kNumBlockVertical - 1 < yIndex) {
 		return MapChipType::kBlank;
 	}
 	return mapChipData_.data[yIndex][xIndex];
 }
 
-Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVirtical - 1 - yIndex), 0); }
+Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVertical - 1 - yIndex), 0); }
 
 IndexSet MapChipField::GetMapChipIndexSetByPosition(const Vector3& position) {
 	IndexSet indexSet = {};
 	indexSet.xIndex = static_cast<uint32_t>((position.x + kBlockWidth / 2) / kBlockWidth);
-	indexSet.yIndex = kNumBlockVirtical - 1 - static_cast<uint32_t>(position.y + kBlockHeight / 2 / kBlockHeight);
+	indexSet.yIndex = kNumBlockVertical - 1 - static_cast<uint32_t>(position.y + kBlockHeight / 2 / kBlockHeight);
 	return indexSet;
 }

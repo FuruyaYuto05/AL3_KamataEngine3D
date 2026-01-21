@@ -99,46 +99,7 @@ void TitleScene::Update() {
 	}
 #pragma endregion
 
-	// counter_ += 1.0f / 60.0f;
-	// counter_ = std::fmod(counter_, kTimeTitleMove);
-
-	// float angle = counter_ / kTimeTitleMove * 2.0f * std::numbers::pi_v<float>;
-
-	// worldTransformTitle_.translation_.y = std::sin(angle) + 10.0f;
-
-	// #pragma region タイトルシーンの動き
-	//
-	//	// 右向きのやつ
-	//	worldTransformPlayerRight_.translation_.x += 0.2f;
-	//
-	//	if (worldTransformPlayerRight_.translation_.x >= 0.0f) {
-	//
-	//		if (worldTransformPlayerRight_.translation_.y >= 15.0f) {
-	//
-	//		} else {
-	//			worldTransformPlayerRight_.translation_.y += 0.9f;
-	//		}
-	//	}
-	//
-	//	if (worldTransformPlayerRight_.translation_.x >= 50.0f) {
-	//		worldTransformPlayerRight_.translation_ = {-50.0f, -10.0f};
-	//	}
-	//
-	//	// 左向きのやつ
-	//	worldTransformPlayerLeft_.translation_.x -= 0.15f;
-	//
-	//	if (worldTransformPlayerLeft_.translation_.x <= 0.0f) {
-	//		if (worldTransformPlayerLeft_.translation_.y >= 15.0f) {
-	//		} else {
-	//			worldTransformPlayerLeft_.translation_.y += 0.9f;
-	//		}
-	//	}
-	//
-	//	if (worldTransformPlayerLeft_.translation_.x <= -50.0f) {
-	//		worldTransformPlayerLeft_.translation_ = {50.0f, -10.0f};
-	//	}
-	//
-	// #pragma endregion
+	
 
 	camera_.TransferMatrix();
 	WorldTransformUpdate(worldTransformTitle_);

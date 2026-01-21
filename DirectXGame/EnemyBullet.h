@@ -13,7 +13,7 @@ public:
 
 	void Draw(const Camera& camera);
 
-	// 死亡フラグ（寿命や衝突でtrueにする）
+	// 死亡フラグ（寿命や衝突）
 	bool IsDead() const { return isDead_; }
 
 	// ワールド座標取得

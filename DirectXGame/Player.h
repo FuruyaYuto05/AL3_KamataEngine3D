@@ -74,6 +74,9 @@ public:
 	// 登場演出用関数Player
 	void UpdateIntro();
 
+	// 登場演出が終わった時のリセット処理
+	void OnIntroFinished();
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
@@ -195,6 +198,8 @@ private:
 	static inline const int32_t kDamageValue = 1; // 敵の接触や弾で受けるダメージ
 
 	bool isDead_ = false;
+
+
 
 
 };

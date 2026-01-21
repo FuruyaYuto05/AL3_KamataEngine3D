@@ -26,7 +26,7 @@ public:
 	// 02_10 スライド14枚目
 	AABB GetAABB();
 	// 02_10 スライド14枚目 ワールド座標を取得
-	Vector3 GetWorldPosition();
+	Vector3 GetWorldPosition() const;
 	// 02_10 スライド20枚目 衝突応答
 	void OnCollision(const Player* player);
 	// --- プレイヤーの攻撃を受けた際の応答 ---
@@ -132,7 +132,7 @@ private:
 	void UpdateOnGround(const CollisionMapInfo& info);
 
 	// 壁接触している場合の処理
-	void UpdateOnWall(const CollisionMapInfo& info);
+	//void UpdateOnWall(const CollisionMapInfo& info);
 
 	//static inline const float kAttenuationWall = 0.2f;
 	static inline const float kAttenuationLanding = 0.0f;
