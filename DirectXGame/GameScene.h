@@ -107,6 +107,7 @@ private:
 	enum class Phase {
 		kIntro, // 登場演出
 		kPlay,  // ゲームプレイ
+		kFinish,
 		kDeath, // デス演出
 	};
 
@@ -128,5 +129,7 @@ private:
 
 		// 演出に書ける時間
 	    static inline const float kIntroDuration = 3.0f;
+
+
 
 };

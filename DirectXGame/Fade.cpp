@@ -3,9 +3,18 @@
 
 void Fade::Initialize() {
 	sprite_ = Sprite::Create(0, Vector2{});
-
 	sprite_->SetSize(Vector2(WinApp::kWindowWidth, WinApp::kWindowHeight));
 	sprite_->SetColor(Vector4(0, 0, 0, 1.f));
+
+	// シャッター用（左半分）
+	spriteLeft_ = Sprite::Create(0, Vector2{});
+	spriteLeft_->SetSize(Vector2(WinApp::kWindowWidth / 2.0f, WinApp::kWindowHeight)); // 幅は半分
+	spriteLeft_->SetColor(Vector4(0, 0, 0, 1.f));                                      // 黒（後で画像に変えればヒビ割れにできます）
+
+	// シャッター用（右半分）
+	spriteRight_ = Sprite::Create(0, Vector2{});
+	spriteRight_->SetSize(Vector2(WinApp::kWindowWidth / 2.0f, WinApp::kWindowHeight)); // 幅は半分
+	spriteRight_->SetColor(Vector4(0, 0, 0, 1.f));
 }
 
 void Fade::Update() {
@@ -45,10 +54,11 @@ void Fade::Draw() {
 	Sprite::PostDraw();
 }
 
-void Fade::Start(Status status, float duration) {
+void Fade::Start(Status status, float duration,Type type) {
 
 	status_ = status;
 	duration_ = duration;
+	type_ = type;
 	counter_ = 0.0f;
 }
 
