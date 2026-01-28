@@ -18,39 +18,63 @@ void Fade::Initialize() {
 }
 
 void Fade::Update() {
-
 	switch (status_) {
 	case Status::None:
-
 		break;
+
 	case Status::FadeIn:
-
 		counter_ += 1.0f / 60.0f;
 		if (counter_ >= duration_) {
 			counter_ = duration_;
 		}
-		sprite_->SetColor(Vector4(0, 0, 0, std::clamp(1.0f - counter_ / duration_, 0.0f, 1.0f)));
 
+		if (type_ == Type::kFade) {
+			// 今までのフェード（透明度）
+			sprite_->SetColor(Vector4(0, 0, 0, std::clamp(1.0f - counter_ / duration_, 0.0f, 1.0f)));
+		} else {
+			// シャッター（座標を外側に逃がしていく）
+			float progress = counter_ / duration_; // 0.0 -> 1.0
+			float moveX = (WinApp::kWindowWidth / 2.0f) * progress;
+			spriteLeft_->SetPosition({-moveX, 0});
+			spriteRight_->SetPosition({WinApp::kWindowWidth / 2.0f + moveX, 0});
+		}
 		break;
-	case Status::FadeOut:
 
+	case Status::FadeOut:
 		counter_ += 1.0f / 60.0f;
 		if (counter_ >= duration_) {
 			counter_ = duration_;
 		}
-		sprite_->SetColor(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+
+		if (type_ == Type::kFade) {
+			// 今までのフェード（透明度）
+			sprite_->SetColor(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		} else {
+			// シャッター（外側から中央へ寄せていく）
+			float progress = counter_ / duration_;      // 0.0 -> 1.0
+			float startX = WinApp::kWindowWidth / 2.0f; // 画面端まで飛ばす距離
+			float moveX = startX * (1.0f - progress);
+			spriteLeft_->SetPosition({-moveX, 0});
+			spriteRight_->SetPosition({WinApp::kWindowWidth / 2.0f + moveX, 0});
+		}
 		break;
 	}
 }
 
 void Fade::Draw() {
-
 	if (status_ == Status::None) {
 		return;
 	}
 
 	Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
-	sprite_->Draw();
+
+	if (type_ == Type::kFade) {
+		sprite_->Draw();
+	} else {
+		spriteLeft_->Draw();
+		spriteRight_->Draw();
+	}
+
 	Sprite::PostDraw();
 }
 

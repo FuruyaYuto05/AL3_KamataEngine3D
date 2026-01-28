@@ -8,6 +8,7 @@
 #include <vector>
 #include "DeathParticles.h"
 #include "Bullet.h"
+#include "Fade.h"
 
 using namespace KamataEngine;
 
@@ -31,7 +32,7 @@ public:
 
 	bool IsFinished() const { return finished_; }
 	
-	
+	Fade* fade_ = nullptr;
 
 		// 終了ステータスを外部へ
 	enum class EndStatus { None, GameOver, GameClear, Reset };
@@ -130,6 +131,11 @@ private:
 		// 演出に書ける時間
 	    static inline const float kIntroDuration = 3.0f;
 
+		Sprite* spritePose_ = nullptr;
+	    uint32_t textureHandlePose_ = 0;
+
+		Sprite* spritePoseMenu_ = nullptr;
+	    uint32_t textureHandlePoseMenu_ = 0;
 
 
 };

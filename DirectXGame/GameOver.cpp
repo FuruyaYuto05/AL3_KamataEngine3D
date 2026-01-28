@@ -22,7 +22,7 @@ void GameOver::Initialize() {
 	fade_ = new Fade();
 	fade_->Initialize();
 
-	fade_->Start(Fade::Status::FadeIn, 1.0f);
+	fade_->Start(Fade::Status::FadeIn, 1.0f, Fade::Type::kFade);
 
 	// 天球
 	modelSkydome_ = Model::CreateFromOBJ("SkyDome", true);
@@ -49,7 +49,7 @@ void GameOver::Update() {
 
 	case Phase::kMain:
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::Type::kFade);
 			phase_ = Phase::kFadeOut;
 			PlaySe();
 		}

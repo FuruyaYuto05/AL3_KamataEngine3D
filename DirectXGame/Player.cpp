@@ -631,7 +631,7 @@ void Player::Update() {
 		// ────────────────────────────────────
 
 		// 攻撃
-		if (input->TriggerKey(DIK_Z)) {
+		if (input->TriggerKey(DIK_X)) {
 			StartAttack();
 		}
 		// ローリング

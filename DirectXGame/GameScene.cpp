@@ -2,6 +2,8 @@
 #include "MyMath.h"
 #include "EnemyBullet.h"
 
+
+
 using namespace KamataEngine;
 
 GameScene::~GameScene() {
@@ -117,6 +119,8 @@ void GameScene::Initialize() {
 
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
 
+	fade_ = new Fade();
+	fade_->Initialize();
 
 	// 02_10 5枚目（for文の中身全部）
 	for (int32_t i = 0; i < 1; ++i) {
@@ -154,6 +158,11 @@ void GameScene::Initialize() {
 	// 登場時の時間
 	introTimer_ = 0.0f;
 
+	textureHandlePose_ = TextureManager::Load("pose.png");
+	spritePose_ = Sprite::Create(textureHandlePose_, {0.0f, 0.0f});
+
+	textureHandlePoseMenu_ = TextureManager::Load("poseMenu.png");
+	spritePoseMenu_ = Sprite::Create(textureHandlePoseMenu_, {0.0f, 0.0f});
 }
 
 void GameScene::GenerateBlocks() {
@@ -453,6 +462,7 @@ void GameScene::Update() {
 
 	  // ① 自機HPが0ならゲームオーバー
 	if (player_ && player_->GetHP() <= 0) {
+		
 		endStatus_ = EndStatus::GameOver;
 		return;
 	}
@@ -518,11 +528,21 @@ void GameScene::Draw() {
 	// スプライト描画前処理
 	Sprite::PreDraw(dxCommon->GetCommandList());
 
+	if (spritePose_) {
+		spritePose_->Draw();
+	}
+
+	if (isPaused_) {
+		if (spritePoseMenu_) {
+			spritePoseMenu_->Draw();
+		}
+	}
+
 	// スプライト描画後処理
 	Sprite::PostDraw();
 }
 
-// 02_10 16枚目
+// 02_10 16枚目0
 void GameScene::CheckAllCollisions() {
 
 	// 判定対象1と2の座標
