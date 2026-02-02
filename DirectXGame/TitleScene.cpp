@@ -9,9 +9,9 @@ TitleScene::~TitleScene() {
 	delete modelPlayerRight_;
 	delete modelPlayerLeft_;
 	delete fade_;
-	if (Audio::GetInstance()->IsPlaying(bgmHandle_)) {
-		Audio::GetInstance()->StopWave(bgmHandle_);
-	}
+	//if (Audio::GetInstance()->IsPlaying(bgmHandle_)) {
+	//	Audio::GetInstance()->StopWave(bgmHandle_);
+	//}
 }
 
 void TitleScene::Initialize() {
@@ -61,7 +61,7 @@ void TitleScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
-	bgmDataHandle_ = Audio::GetInstance()->LoadWave("title.wav");
+	//bgmDataHandle_ = Audio::GetInstance()->LoadWave("title.wav");
 	seDataHandle_ = Audio::GetInstance()->LoadWave("enter.wav");
 }
 
@@ -75,7 +75,7 @@ void TitleScene::Update() {
 		fade_->Update();
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
-			PlayBgm();
+			//PlayBgm();
 		}
 		break;
 
@@ -84,7 +84,7 @@ void TitleScene::Update() {
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::Type::kShutter);
 			phase_ = Phase::kFadeOut;
-			isPlayBgm_ = false;
+			//isPlayBgm_ = false;
 
 			// PlaySe();
 		}
@@ -128,12 +128,12 @@ void TitleScene::Draw() {
 	Model::PostDraw();
 }
 
-void TitleScene::PlayBgm() {
-	if (!isPlayBgm_) {
-		bgmHandle_ = Audio::GetInstance()->PlayWave(bgmDataHandle_, true, 0.3f);
-		isPlayBgm_ = true;
-	}
-}
+//void TitleScene::PlayBgm() {
+//	if (!isPlayBgm_) {
+//		bgmHandle_ = Audio::GetInstance()->PlayWave(bgmDataHandle_, true, 0.3f);
+//		isPlayBgm_ = true;
+//	}
+//}
 
 void TitleScene::PlaySe() {
 	if (!isPlaySe_) {

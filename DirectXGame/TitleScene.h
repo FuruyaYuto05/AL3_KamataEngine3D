@@ -51,9 +51,9 @@ private:
 	Model* modelSkydome_ = nullptr;
 	Skydome* skydome_ = nullptr;
 	// bgm
-	uint32_t bgmDataHandle_;
-	uint32_t bgmHandle_;
-	bool isPlayBgm_ = false;
+	//uint32_t bgmDataHandle_ = 0;
+	//uint32_t bgmHandle_ = 0;
+	//bool isPlayBgm_ = false;
 
 	uint32_t seDataHandle_;
 	uint32_t seHandle_;

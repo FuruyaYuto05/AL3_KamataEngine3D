@@ -46,8 +46,8 @@ private:
 	Fade* fade_ = nullptr;
 	Phase phase_ = Phase::kFadeIn;
 
-	uint32_t bgmDataHandle_;
-	uint32_t bgmHandle_;
+	uint32_t bgmDataHandle_ = 0;
+	uint32_t bgmHandle_ = 0;
 	bool isPlayBgm_ = false;
 
 	uint32_t enterSeDataHandle_;

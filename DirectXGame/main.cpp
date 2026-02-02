@@ -10,7 +10,7 @@ using namespace KamataEngine;
 
 TitleScene* titleScene = nullptr;
 RuleScene* ruleScene = nullptr;
-GameScene* gameScene = new GameScene;
+GameScene* gameScene = nullptr;
 ClearScene* clearScene = nullptr;
 GameOver* gameOver = nullptr;
 
@@ -51,7 +51,7 @@ void ChangeScene() {
 		}
 		break;
 
-
+		
 	case Scene::kGame:
 		if (gameScene->IsFinished()) {
 			// 終了ステータスの取得

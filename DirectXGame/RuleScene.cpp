@@ -10,6 +10,8 @@ RuleScene::~RuleScene() {
 	if (Audio::GetInstance()->IsPlaying(bgmHandle_)) {
 		Audio::GetInstance()->StopWave(bgmHandle_);
 	}
+
+	
 }
 
 void RuleScene::Initialize() {
@@ -38,6 +40,8 @@ void RuleScene::Initialize() {
 	fade_->Initialize();
 
 	fade_->Start(Fade::Status::FadeIn, 1.0f, Fade::Type::kShutter);
+
+	bgmDataHandle_ = Audio::GetInstance()->LoadWave("rule.wav");
 
 
 }

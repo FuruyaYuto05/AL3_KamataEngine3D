@@ -38,6 +38,8 @@ public:
 	enum class EndStatus { None, GameOver, GameClear, Reset };
 	EndStatus GetEndStatus() const { return endStatus_; }
 
+	void PlayBgm();
+
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
@@ -137,5 +139,9 @@ private:
 		Sprite* spritePoseMenu_ = nullptr;
 	    uint32_t textureHandlePoseMenu_ = 0;
 
+
+		uint32_t bgmDataHandle_ = 0;
+	    uint32_t bgmHandle_ = 0;
+	    bool isPlayBgm_ = false;
 
 };

@@ -42,6 +42,9 @@ GameScene::~GameScene() {
 	}
 	bullets_.clear();
 
+	if (Audio::GetInstance()->IsPlaying(bgmHandle_)) {
+		Audio::GetInstance()->StopWave(bgmHandle_);
+	}
 }
 
 bool IsAABBCollide(const AABB& a, const AABB& b) { return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.y <= b.max.y && a.max.y >= b.min.y && a.min.z <= b.max.z && a.max.z >= b.min.z; }
@@ -163,6 +166,11 @@ void GameScene::Initialize() {
 
 	textureHandlePoseMenu_ = TextureManager::Load("poseMenu.png");
 	spritePoseMenu_ = Sprite::Create(textureHandlePoseMenu_, {0.0f, 0.0f});
+
+
+	bgmDataHandle_ = Audio::GetInstance()->LoadWave("gamescene.wav");
+	PlayBgm();
+
 }
 
 void GameScene::GenerateBlocks() {
@@ -606,4 +614,11 @@ void GameScene::CheckAllCollisions() {
 		}
 	}
 #pragma endregion
+}
+
+
+void GameScene::PlayBgm() {
+	// 引数: (ハンドル, ループするかどうか, 音量)
+	// ループは true, 音量は適宜調整 (例: 0.1f 〜 1.0f)
+	bgmHandle_ = Audio::GetInstance()->PlayWave(bgmDataHandle_, true, 0.5f);
 }
